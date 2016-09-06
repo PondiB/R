@@ -1,8 +1,7 @@
-This scripts constructs a time series using MODIS data from the Global 
-Agriculture Monitoring (GLAM) Project 
-"(http://pekko.geog.umd.edu/usda/beta/data_new.php)".
-
-Author: John Mutua, Email address: j.y.mutua@cgiar.org
+## This scripts constructs a time series using MODIS data from the Global 
+## Agriculture Monitoring (GLAM) Project 
+## "(http://pekko.geog.umd.edu/usda/beta/data_new.php)".
+## Author: John Mutua, Email address: j.y.mutua@cgiar.org
 
 First, clear your work space
 ```{r}
