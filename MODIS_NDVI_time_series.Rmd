@@ -16,6 +16,7 @@ rm(list = ls(all = TRUE))
 
 ## ----load-libraries----
 # load packages
+```{r}
 require(raster) #working with rasters#
 require(rgdal) #working with geospatial data#
 require(ggplot2) #creating graphs#
@@ -23,6 +24,7 @@ require(dplyr) #subsetting by season#
 require(lubridate) #working with dates#
 require(grid) #arranging plots#
 require(gridExtra) #arranging plots#
+```
 
 ## set working directory
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
