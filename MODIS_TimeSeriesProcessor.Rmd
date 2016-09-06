@@ -130,34 +130,39 @@ avg_NDVI_Otjo_Seasons <- avg_NDVI_Otjo %>%
                          ifelse(month %in% c(9, 10, 11), "Hot-Dry", "Error"))))
 ```
 
-# check to see if this worked
+Let's check to see if that worked
+```{r}
 head(avg_NDVI_Otjo_Seasons$month)
 head(avg_NDVI_Otjo_Seasons$season)
 tail(avg_NDVI_Otjo_Seasons$month)
 tail(avg_NDVI_Otjo_Seasons$season)
+```
 
-######################################
 ###-----------MONTHLY PLOTS--------###
-######################################
 
-# aggregate data by month
+Aggregate data by month
+```{r}
 monthNDVI<-avg_NDVI_Otjo_Seasons %>%
   group_by(month) %>%
   summarise(monthNDVI=mean(meanNDVI, na.rm=TRUE))
+```
 
-# convert month numeric to month abbrevaition
+Convert month numeric to month abbrevaition
+```{r}
 monthNDVI$month_name <- month.abb[monthNDVI$month]
+```
 
-# reassign the month_name field to a factor
+Reassign the "month_name"" field to a factor
+```{r}
 monthNDVI$month_name = factor(monthNDVI$month_name,
                               levels=c('Jan','Feb','Mar',
                                        'Apr','May','Jun','Jul',
                                        'Aug','Sep','Oct',
                                        'Nov','Dec'))
+```
 
-head(monthNDVI)
-
-# plot data by month
+Plot data by month
+```{r}
 Monthly_NDVI_Plot<-ggplot(monthNDVI, aes(month_name, monthNDVI, group=4)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Monthly") +
@@ -166,18 +171,20 @@ Monthly_NDVI_Plot<-ggplot(monthNDVI, aes(month_name, monthNDVI, group=4)) +
                                   size = 20)) +
   theme(text = element_text(size=18)) + geom_point()
 Monthly_NDVI_Plot
+```
 
-# plot the same plot as before but with one plot per season, save as .pdf
+Plot the same plot as before but with one plot per season, save as .pdf
+```{r}
 ggsave(file="Otjozondjupa_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
 
 ###----------INDIVINDUAL SEASONAL PLOTS------------###
-### HOT-WET Season
+Plot HOT-WET Season
+```{r}
 Hot_Wet <- subset(monthNDVI, month >= 12 | month <= 5)
 target <- c("12", "5", "4", "3", "2", "1")
 Hot_Wet<-Hot_Wet[match(target, Hot_Wet$month),]
-
 Hot_Wet$month_name <- factor(Hot_Wet$month_name, c("Dec", "Jan", "Feb", "Mar", "Apr", "May"))
-
 Hot_Wet_NDVI_Plot<-ggplot(Hot_Wet, aes(month_name, monthNDVI, group=1)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Hot Wet Season ") +
@@ -186,13 +193,16 @@ Hot_Wet_NDVI_Plot<-ggplot(Hot_Wet, aes(month_name, monthNDVI, group=1)) +
                                   size = 20)) +
   theme(text = element_text(size=18)) + geom_point()
 Hot_Wet_NDVI_Plot
+```
 
-# plot the same plot as before but with one plot per season, save as .pdf
+Plot the same plot as before but with one plot per season, save as .pdf
+```{r}
 ggsave(file="Otjozondjupa_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
 
-### COOL-DRY Season
+Plot COOL-DRY Season
+```{r}
 Cool_Dry <- subset(monthNDVI, month <= 8 & month >= 6)
-
 Cool_Dry_NDVI_Plot<-ggplot(Cool_Dry, aes(month_name, monthNDVI, group=1)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Cool Dry Season") +
@@ -201,13 +211,16 @@ Cool_Dry_NDVI_Plot<-ggplot(Cool_Dry, aes(month_name, monthNDVI, group=1)) +
                                   size = 20)) +
   theme(text = element_text(size=18)) + geom_point()
 Cool_Dry_NDVI_Plot
+```
 
-# plot the same plot as before but with one plot per season, save as .pdf
+Plot the same plot as before but with one plot per season, save as .pdf
+```{r}
 ggsave(file="Otjozondjupa_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
 
-### HOT DRY Season
+Plot HOT DRY Season
+```{r}
 Hot_Dry <- subset(monthNDVI, month <= 11 & month >= 9)
-
 Hot_Dry_NDVI_Plot<-ggplot(Hot_Dry, aes(month_name, monthNDVI, group=1)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Hot Dry Season") +
@@ -216,25 +229,29 @@ Hot_Dry_NDVI_Plot<-ggplot(Hot_Dry, aes(month_name, monthNDVI, group=1)) +
                                   size = 20)) +
   theme(text = element_text(size=18)) + geom_point()
 Hot_Dry_NDVI_Plot
+```
 
-# plot the same plot as before but with one plot per season, save as .pdf
+Plot the same plot as before but with one plot per season, save as .pdf
+```{r}
 ggsave(file="Otjozondjupa_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
 
-##-----------END OF MONTHLY PLOTS--------
-
-######################################
 ##-----------SEASONAL PLOTS--------
-######################################
 
-# aggregate data by season
+Let's aggregate data by season
+```{r}
 seasonNDVI<-avg_NDVI_Otjo_Seasons %>%
   group_by(year, season) %>%
   summarise(seasonNDVI=mean(meanNDVI, na.rm=TRUE))
+```
 
-# create a .csv of seasonal NDVI values 
+Export comma separated file of seasonal NDVI values
+```{r}
 write.csv(seasonNDVI, file="Seasonal_NDVI_2005-2015.csv")
+```
 
-# plot data by season
+Plot data by season
+```{r}
 Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Seasonal") +
@@ -242,11 +259,16 @@ Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
   theme(plot.title = element_text(lineheight=.8, face="bold",
                                   size = 20)) +
   theme(text = element_text(size=18)) + geom_point()
+```
 
-# plot the same plot as before but with one plot per season, save as .pdf
+Plot the same plot as before but with one plot per season, save as .pdf
+```{r}
 Seasonal_NDVI_Plot + facet_grid(. ~ season)
 ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
 
-# plot the same plot in a landscape orientation, save as .pdf
+Plot the same plot in a landscape orientation, save as .pdf
+```{r}
 Seasonal_NDVI_Plot + facet_grid(season ~ .)
 ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+```
