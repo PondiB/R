@@ -27,23 +27,31 @@ require(gridExtra) #arranging plots#
 ```
 
 ## set working directory
+```{r}
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
+```
 
 ## ----import-NDVI-rasters----
+
+```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
+```
 
 # create a raster stack
+```{r}
 NDVI_Otjo_stack <- stack(rasList) 
+```
 
 # insert a Temporal id
+# characters corresponding to the year are located between the 20 and 23 position
+# characters corresponding to the date are located between the 24 and 26 position
+```{r}
 oldnames<-names(NDVI_Otjo_stack)
 head(oldnames)
-# characters corresponding to the year are located between the 20 and 23 position
 year<-substr(oldnames,20,23)
 table(year)
-
-# characters corresponding to the date are located between the 24 and 26 position
 julianDay<-substr(oldnames,24,26)
+```
 
 # calculate mean NDVI for each raster and convert output array to a data frame
 avg_NDVI_Otjo <- as.data.frame(cellStats(NDVI_Otjo_stack,mean))
