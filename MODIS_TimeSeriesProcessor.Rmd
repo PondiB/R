@@ -2,13 +2,13 @@
 title: "Constructing a time series using MODIS data"
 author: "John Mutua"
 date: "Monday, September 05, 2016"
-use: "Script extracts NDVI values from MODIS rasters and plots a time series by season and month"
-data input: "Preprocessd MODIS rasters"
 output: html_document
-
+data input: Processed MODIS rasters
+use: Script extracts NDVI values from MODIS rasters and plots a time series by season
+  and month
 ---
 
-First, clear your workspace
+First, clear your work space
 
 ```{r}
 rm(list = ls(all = TRUE))
@@ -40,7 +40,7 @@ Create a raster stack
 NDVI_Otjo_stack <- stack(rasList) 
 ```
 
-Insert a Temporal id to the dataframe. Characters corresponding to the year are located between the 20 and 23 position
+Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position
 while characters corresponding to the date are located between the 24 and 26 position
 ```{r}
 oldnames<-names(NDVI_Otjo_stack)
@@ -87,7 +87,7 @@ class(avg_NDVI_Otjo$date)
 class(avg_NDVI_Otjo$julianDay)
 ```
 
-Add site and year columns to the dataframe
+Add site and year columns to the data frame
 ```{r}
 avg_NDVI_Otjo$site <- "Otjozondjupa Region"
 avg_NDVI_Otjo$year <- year
@@ -105,7 +105,7 @@ ggplot(avg_NDVI_Otjo, aes(year, meanNDVI), na.rm=TRUE) +
   theme(text = element_text(size=20))
 ```
 
-Write NDVI data to a .csv file in your local drive
+Write NDVI data to a comma separated file in your local drive
 ```{r}
 Otjo_NDVI_Values<-avg_NDVI_Otjo
 ```
@@ -147,7 +147,7 @@ monthNDVI<-avg_NDVI_Otjo_Seasons %>%
   summarise(monthNDVI=mean(meanNDVI, na.rm=TRUE))
 ```
 
-Convert month numeric to month abbrevaition
+Convert month numeric to month abbreviation
 ```{r}
 monthNDVI$month_name <- month.abb[monthNDVI$month]
 ```
