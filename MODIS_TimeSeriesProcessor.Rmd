@@ -1,18 +1,18 @@
 # Tutorial: MODIS NDVI Time series Analysis
+
 Author: John Mutua.
 
 Date: September, 6 2016.
 
+This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
 
-This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
-
-### Start of script
 First clear your work space:
 ```{r}
 rm(list = ls(all = TRUE))
 ```
 
 ### Preliminaries
+
 You need to first install all the required packages. Type (within R) install packages("name of package") (This needs to be done just once.). You then load the packages using the 'library' function:
 
 ```{r}
