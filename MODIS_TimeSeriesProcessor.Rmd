@@ -4,7 +4,8 @@ author: "John Mutua"
 date: "Monday, September 05, 2016"
 output: html_document
 data input: Processed MODIS rasters
-use: Script extracts NDVI values from MODIS rasters and plots a time series by season and month
+use: Script extracts NDVI values from MODIS rasters and plots a time series by 
+season and month
 ---
 
 First, clear your work space
@@ -13,8 +14,9 @@ rm(list = ls(all = TRUE))
 ```
 
 ### Preliminaries
-You need to first install all the required packages. Type (within R) install.packages("name of package") (This needs to be done just once.)
-You then load the packages using the library function:
+You need to first install all the required packages. Type (within R) install.
+packages("name of package") (This needs to be done just once.)
+You then load the packages using the 'library' function:
 
 ```{r}
 library(raster) #working with rasters
@@ -26,12 +28,25 @@ library(grid) #arranging plots
 library(gridExtra) #arranging plots
 ```
 
-Set your working directory
+This needs to be done every time you start R. (There is a way to have the 
+package loaded automatically every time, but we won't discuss that here.)
+
+To get help on the functions and data sets in R, use `help()` or `?`. 
+For example, to view the help file for the `calc` function, type one of 
+the following:
+
+```{r help, eval=FALSE}
+help(calc)
+?calc
+```
+
+Set your working directory as follows:
 ```{r}
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
 ```
 
-Import NDVI rasters and create a raster stack
+Import all NDVI raster datasets in your working directory and create a raster 
+stack
 ```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
 NDVI_Otjo_stack <- stack(rasList) 
