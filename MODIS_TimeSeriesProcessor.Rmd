@@ -4,12 +4,10 @@ author: "John Mutua"
 date: "Monday, September 05, 2016"
 output: html_document
 data input: Processed MODIS rasters
-use: Script extracts NDVI values from MODIS rasters and plots a time series by season
-  and month
+use: Script extracts NDVI values from MODIS rasters and plots a time series by season and month
 ---
 
 First, clear your work space
-
 ```{r}
 rm(list = ls(all = TRUE))
 ```
@@ -93,7 +91,7 @@ avg_NDVI_Otjo$site <- "Otjozondjupa Region"
 avg_NDVI_Otjo$year <- year
 ```
 
-## ----plot-time-series----
+ ----plot-time-series----
 
 Plot NDVI by year although this doesn't make sense
 
