@@ -91,7 +91,7 @@ avg_NDVI_Otjo$site <- "Otjozondjupa Region"
 avg_NDVI_Otjo$year <- year
 ```
 
- ----plot-time-series----
+## plot time series
 
 Plot NDVI by year although this doesn't make sense
 
@@ -136,7 +136,7 @@ tail(avg_NDVI_Otjo_Seasons$month)
 tail(avg_NDVI_Otjo_Seasons$season)
 ```
 
-###-----------MONTHLY PLOTS--------###
+## Start of monthly plots
 
 Aggregate data by month
 ```{r}
@@ -176,7 +176,7 @@ Plot the same plot as before but with one plot per season, save as .pdf
 ggsave(file="Otjozondjupa_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
-###----------INDIVINDUAL SEASONAL PLOTS------------###
+## Start of indivindual seasonal plots
 Plot HOT-WET Season
 ```{r}
 Hot_Wet <- subset(monthNDVI, month >= 12 | month <= 5)
@@ -234,7 +234,7 @@ Plot the same plot as before but with one plot per season, save as .pdf
 ggsave(file="Otjozondjupa_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
-##-----------SEASONAL PLOTS--------
+## Start of merged seasonal plots
 
 Let's aggregate data by season
 ```{r}
