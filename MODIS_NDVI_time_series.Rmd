@@ -70,33 +70,28 @@ Check out the class in the new column
 class(avg_NDVI_Otjo$julianDay)
 ```
 
-Create a time vector with the date
+Create a time vector and convert it to a date
 ```{r}
 tVector<-paste(year,julianDay,sep="-")
+timeNDVI<-as.Date(tVector,format = "%Y-%j")
 ```
 
-# convert the vector to a date
-timeNDVI<-as.Date(tVector,format = "%Y-%j")
-head(timeNDVI)
-
-# add date values as a column in the data frame
+Add date values as a column in the data frame
+```{r}
 avg_NDVI_Otjo$date <- timeNDVI
+```
 
-# Classes of the two columns now? 
+Check out classes of the two columns now
+```{r}
 class(avg_NDVI_Otjo$date)
 class(avg_NDVI_Otjo$julianDay)
+```
 
-# add a site column to our data
+Add site and year columns to the dataframe
+```{r}
 avg_NDVI_Otjo$site <- "Otjozondjupa Region"
-
-# view data
-head(avg_NDVI_Otjo)
-
-# add a "year" column to our data
 avg_NDVI_Otjo$year <- year
-
-# view data
-avg_NDVI_Otjo
+```
 
 ## ----plot-time-series----
 # plot NDVI by time although this doesn't make sense
