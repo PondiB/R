@@ -14,8 +14,7 @@ First, clear your workspace
 rm(list = ls(all = TRUE))
 ```
 
-## ----load-libraries----
-# load packages
+Second, load all required libraries
 ```{r}
 require(raster) #working with rasters#
 require(rgdal) #working with geospatial data#
