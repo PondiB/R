@@ -1,7 +1,7 @@
 ---
 title: "MODIS NDVI Time series tutorial"
-author: "Mutua John"
-date: "September 6, 2016"
+author: Mutua John
+date: September 6, 2016
 output: html_document
 email: j.y.mutua@cgiar.org
 ---
