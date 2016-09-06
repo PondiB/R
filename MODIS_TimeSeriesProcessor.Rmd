@@ -1,17 +1,9 @@
+---
 This scripts constructs a time series using MODIS data from the Global 
 Agriculture Monitoring (GLAM) Project 
 "(http://pekko.geog.umd.edu/usda/beta/data_new.php)".
 
 Author: John Mutua, Email address: j.y.mutua@cgiar.org
-
----
-title: "Constructing a time series using MODIS data"
-author: "John Mutua"
-date: "Monday, September 05, 2016"
-output: html_document
-data input: Processed MODIS rasters
-use: Script extracts NDVI values from MODIS rasters and plots a time series by 
-season and month
 ---
 
 First, clear your work space
