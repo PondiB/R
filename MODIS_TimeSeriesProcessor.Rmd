@@ -1,7 +1,7 @@
-## This scripts constructs a time series using MODIS data from the Global 
-## Agriculture Monitoring (GLAM) Project 
-## "(http://pekko.geog.umd.edu/usda/beta/data_new.php)".
-## Author: John Mutua, Email address: j.y.mutua@cgiar.org
+This scripts constructs a time series using MODIS data from the Global 
+Agriculture Monitoring (GLAM) Project 
+"(http://pekko.geog.umd.edu/usda/beta/data_new.php)".
+Author: John Mutua, Email address: j.y.mutua@cgiar.org
 
 First, clear your work space
 ```{r}
@@ -100,7 +100,7 @@ avg_NDVI_Otjo$site <- "Otjozondjupa Region"
 avg_NDVI_Otjo$year <- year
 ```
 
-## Plot time series
+### Plot time series
 
 Plot NDVI by year although this doesn't make sense
 
@@ -145,7 +145,7 @@ tail(avg_NDVI_Otjo_Seasons$month)
 tail(avg_NDVI_Otjo_Seasons$season)
 ```
 
-## Start of monthly plots
+### Start of monthly plots
 
 Aggregate data by month
 ```{r}
@@ -185,7 +185,7 @@ Plot the same plot as before but with one plot per season, save as .pdf
 ggsave(file="Otjozondjupa_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
-## Start of indivindual seasonal plots
+### Start of indivindual seasonal plots
 Plot HOT-WET Season
 ```{r}
 Hot_Wet <- subset(monthNDVI, month >= 12 | month <= 5)
@@ -243,8 +243,7 @@ Plot the same plot as before but with one plot per season, save as .pdf
 ggsave(file="Otjozondjupa_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
-## Start of merged seasonal plots
-
+### Start of merged seasonal plots
 Let's aggregate data by season
 ```{r}
 seasonNDVI<-avg_NDVI_Otjo_Seasons %>%
