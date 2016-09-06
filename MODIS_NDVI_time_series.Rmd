@@ -26,25 +26,25 @@ require(grid) #arranging plots#
 require(gridExtra) #arranging plots#
 ```
 
-## set working directory
+Set your working directory
 ```{r}
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
 ```
 
-## ----import-NDVI-rasters----
+Import-NDVI-rasters
 
 ```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
 ```
 
-# create a raster stack
+Create a raster stack
 ```{r}
 NDVI_Otjo_stack <- stack(rasList) 
 ```
 
-# insert a Temporal id
-# characters corresponding to the year are located between the 20 and 23 position
-# characters corresponding to the date are located between the 24 and 26 position
+Insert a Temporal id to the dataframe. Characters corresponding to the year are located between the 20 and 23 position
+while characters corresponding to the date are located between the 24 and 26 position
+
 ```{r}
 oldnames<-names(NDVI_Otjo_stack)
 head(oldnames)
