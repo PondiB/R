@@ -1,9 +1,7 @@
 # Tutorial: MODIS NDVI Time series Analysis
+John Mutua.
+September, 6 2016.
 
----
-author: "John Mutua"
-date: "September, 6 2016"
----
 
 This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
 
