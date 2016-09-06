@@ -12,15 +12,18 @@ First, clear your work space
 rm(list = ls(all = TRUE))
 ```
 
-Second, load all required libraries
+### Preliminaries
+To install all required packages, you need to first install the packages. Type (within R) install.packages("name of package") (This needs to be done just once.)
+You then load the packages using the library function:
+
 ```{r}
-require(raster) #working with rasters#
-require(rgdal) #working with geospatial data#
-require(ggplot2) #creating graphs#
-require(dplyr) #subsetting by season#
-require(lubridate) #working with dates#
-require(grid) #arranging plots#
-require(gridExtra) #arranging plots#
+require(raster) #working with rasters
+require(rgdal) #working with geospatial data
+require(ggplot2) #creating graphs
+require(dplyr) #subsetting by season
+require(lubridate) #working with dates
+require(grid) #arranging plots
+require(gridExtra) #arranging plots
 ```
 
 Set your working directory
@@ -28,7 +31,7 @@ Set your working directory
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
 ```
 
-Import-NDVI-rasters and create a stack
+Import NDVI rasters and create a raster stack
 ```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
 NDVI_Otjo_stack <- stack(rasList) 
@@ -87,7 +90,7 @@ avg_NDVI_Otjo$site <- "Otjozondjupa Region"
 avg_NDVI_Otjo$year <- year
 ```
 
-## plot time series
+## Plot time series
 
 Plot NDVI by year although this doesn't make sense
 
