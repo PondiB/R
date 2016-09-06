@@ -1,14 +1,11 @@
 ---
 title: "MODIS NDVI Time series tutorial"
-author: Mutua John
-date: September 6, 2016
-output: html_document
-email: j.y.mutua@cgiar.org
+author: "John Mutua"
+date: "Tuesday, September 06, 2016"
+output: pdf_document
 ---
 
-This manual will help you construct a time series using MODIS data from the Global 
-Agriculture Monitoring (GLAM) Project 
-"(http://pekko.geog.umd.edu/usda/beta/data_new.php)"
+This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project "(http://pekko.geog.umd.edu/usda/beta/data_new.php)"
 
 ### Start of script
 First clear your work space
