@@ -35,14 +35,12 @@ help(calc)
 ```
 
 Set your working directory as follows:
-```{r}
-setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
-```
+<!-- setwd("D:/ToBackup/Data/Regional/LDN_Namibia") --> 
 
 Import all NDVI raster datasets in your working directory and create a raster stack
 ```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
-NDVI_Otjo_stack <- stack(rasList) 
+NDVI_Otjo_stack <- stack(rasList)
 ```
 
 Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position
