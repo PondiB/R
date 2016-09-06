@@ -28,13 +28,9 @@ Set your working directory
 setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
 ```
 
-Import-NDVI-rasters
+Import-NDVI-rasters and create a stack
 ```{r}
 rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
-```
-
-Create a raster stack
-```{r}
 NDVI_Otjo_stack <- stack(rasList) 
 ```
 
