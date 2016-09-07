@@ -35,7 +35,10 @@ help(calc)
 ```
 
 Set your working directory as follows:
-<!-- setwd("D:/ToBackup/Data/Regional/LDN_Namibia") --> 
+```{r}
+setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
+```
+
 
 Import all NDVI raster datasets in your working directory and create a raster stack
 ```{r}
