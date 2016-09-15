@@ -48,7 +48,7 @@ BushData_clean<-BushData_clean[complete.cases(BushData_clean),]
 # export data to .csv
 write.csv(BushData_clean, file = "Otjozondjupa_trainData.csv",row.names=FALSE)
 
-# Get long and lat from your data.frame. Make sure that the order is in lon/lat.
+# get long and lat from your data.frame. Make sure that the order is in lon/lat.
 xy <- BushData_clean[,c(3,2)]
 trainData <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
                                     proj4string = CRS("+proj=utm +zone=33 +south +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"))
