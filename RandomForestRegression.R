@@ -97,7 +97,7 @@ names(trainData) <- c("waypoint_no", "latitude", "longitude", "crown_cover2",
 # remove NAs
 trainData@data<-trainData@data[complete.cases(trainData@data),]
 
-# Export extracted data to .csv
+# export extracted data to .csv
 write.csv(trainData@data, file = "Otjozondjupa_MF_trainData.csv",row.names=FALSE)
 
 # randomly select index numbers and use that for splitting the data
@@ -135,7 +135,7 @@ print(model1)
 # plot mean decrease in variable importance
 varImpPlot(model1, type=1)
 
-# Predict Model
+# predict Model
 predict(covs, model1, filename="otjo_bd1", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
 

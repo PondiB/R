@@ -1,4 +1,6 @@
-# perform a random forest classification
+# calculate crown cover using ndvi and landsat bands as covariates
+# author: Mutua John
+# email: j.y.mutua@cgiar.org
 
 # workspace clearance
 rm(list = ls(all = TRUE))
