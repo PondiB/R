@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 # Tutorial: MODIS NDVI Time series Analysis
 
 Author: John Mutua.
@@ -9,6 +12,11 @@ This manual will help you construct a time series using MODIS data from the Glob
 First clear your work space:
 ```{r}
 rm(list = ls(all = TRUE))
+```
+
+```{r "setup", include=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "D:/ToBackup/Data/Regional/LDN_Namibia/NDVI_Modis/AOI_NDVI")
 ```
 
 ### Preliminaries
@@ -25,6 +33,12 @@ library(grid) #arranging plots
 library(gridExtra) #arranging plots
 ```
 
+Set your working directory as follows:
+```{r}
+setwd("D:/ToBackup/Data/Regional/LDN_Namibia/NDVI_Modis/AOI_NDVI")
+```
+
+
 This needs to be done every time you start R. (There is a way to have the package loaded automatically every time, but we won't discuss that here.):
 
 To get help on the functions and data sets in R, use `help()` or `?`. For example, to view the help file for the `calc` function, type one of the following:
@@ -34,16 +48,9 @@ help(calc)
 ?calc
 ```
 
-Set your working directory as follows:
-```{r}
-setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
-```
-
-
 Import all NDVI raster datasets in your working directory and create a raster stack
 ```{r}
-rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
-NDVI_Otjo_stack <- stack(rasList)
+NDVI_Otjo_stack <- stack(list.files(getwd(), full.names = TRUE, pattern = ".tif$"))
 ```
 
 Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position
@@ -116,10 +123,10 @@ Write NDVI data to a comma separated file in your local drive
 Otjo_NDVI_Values<-avg_NDVI_Otjo
 ```
 
-Drop the row.names column
+Drop the _row.names_ column
 ```{r}
 row.names(Otjo_NDVI_Values)<-NULL
-write.csv(Otjo_NDVI_Values, file="meanNDVI_Otjo_2005-2015.csv", overwrite=TRUE)
+write.csv(Otjo_NDVI_Values, file="meanNDVI_Otjo_2005-2015.csv")
 ```
 
 Add month to data frame
