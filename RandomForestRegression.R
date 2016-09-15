@@ -1,5 +1,3 @@
-# author: john Mutua
-# email: j.y.mutua@cgiar.org
 # calculate bush density using count data using ndvi and crown cover data as covariates
 # author: Mutua John
 # email: j.y.mutua@cgiar.org
