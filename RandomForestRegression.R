@@ -1,5 +1,6 @@
-# calculate bush density using count of bushes data
-# covariates used include ndvi and crown cover data
+# author: john Mutua
+# email: j.y.mutua@cgiar.org
+# calculate bush density using count data using ndvi and crown cover data as covariates
 # author: Mutua John
 # email: j.y.mutua@cgiar.org
 
