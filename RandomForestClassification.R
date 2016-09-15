@@ -136,3 +136,4 @@ print(t)
 accuracy <- sum(testingSet$rightPred)/nrow(testingSet)
 accuracies <- c(accuracies,accuracy)
 print(accuracy)
+
