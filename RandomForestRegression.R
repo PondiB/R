@@ -120,8 +120,6 @@ scatterplot(shrubs_more1.5 ~ crown_cover, data=trainingSet,
 scatterplot(shrubs_less1.5 ~ crown_cover, data=trainingSet, 
             xlab="Crown cover",ylab="shrubs_less1.5", main="shrubs_less1.5 versus Crown cover")
 
-
-
 #############################################
 # set up the model using randomly sampled data
 # predict shrubs_less1.5
