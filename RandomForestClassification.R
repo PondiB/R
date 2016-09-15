@@ -8,9 +8,9 @@ rm(list = ls(all = TRUE))
 # set the random seed 
 set.seed(500)
 
-# List of packages for the session
+# list of packages for the session
 .packages = c("sp", "rgdal", "raster","randomForest", "plyr", "xlsx", "dplyr", "caret", "car")
-# Install CRAN packages (if not already installed)
+# install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 # Load packages into session 
@@ -103,7 +103,7 @@ names(trainData) <- c("waypoint_no", "latitude", "longitude", "crown_cover",
 # remove NAs
 trainData@data<-trainData@data[complete.cases(trainData@data),]
 
-# Export extracted data to .csv
+# export extracted data to .csv
 write.csv(trainData@data, file = "Otjozondjupa_MF_trainData.csv",row.names=FALSE)
 
 # randomly select index numbers and use that for splitting the data
@@ -138,4 +138,3 @@ print(t)
 accuracy <- sum(testingSet$rightPred)/nrow(testingSet)
 accuracies <- c(accuracies,accuracy)
 print(accuracy)
-
