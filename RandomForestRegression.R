@@ -23,19 +23,17 @@ setwd("C:/Users/jymutua/Documents/Bush_Density_Mapping")
 BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
 
 # calculate values by finding the median in crown cover and mean of values for counts
-# 1 plot 0.01 ha
+# 1 plot 0.01 ha; 4 plots 0.04 ha
 BushData$crown_cover <- apply(BushData[,4:7], 1, median, na.rm=TRUE)
-BushData$shrubs_less_1.5 <- apply(BushData[,8:11], 1, mean, na.rm=TRUE)
-BushData$shrubs_more_1.5_no_stem <- apply(BushData[,16:19], 1, mean, na.rm=TRUE)
-BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, mean, na.rm=TRUE)
+BushData$shrubs_less_1.5 <- apply(BushData[,8:11], 1, sum, na.rm=TRUE)
+BushData$shrubs_more_1.5_no_stem <- apply(BushData[,16:19], 1, sum, na.rm=TRUE)
+BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, sum, na.rm=TRUE)
 
 # create new data frame with the columns you need
 BushData_clean<-BushData[,c("Waypoint_No","Latitude","Longitude", "crown_cover",
                             "shrubs_less_1.5","shrubs_more_1.5_no_stem","shrubs_more_1.5_stem")]
 
-# to calculate crown cover
-# crown cover for year 2016, defined as crown cover for all vegetation taller than 1.5 in height. 
-# encoded as a percentage per output grid cell, in the range 0-100.
+# add a new column of shrubs more than 1.5
 BushData_clean$shrubs_more_1.5 <- apply(BushData_clean[,6:7], 1, sum, na.rm=TRUE)
 
 # round columns
@@ -46,7 +44,7 @@ BushData_clean<-BushData_clean %>% mutate_each(funs(round(.,0)),
 BushData_clean<-BushData_clean[complete.cases(BushData_clean),]
 
 # export data to .csv
-write.csv(BushData_clean, file = "Otjozondjupa_trainData.csv",row.names=FALSE)
+write.csv(BushData_clean, file = "Otjozondjupa_BushData_trainData.csv",row.names=FALSE)
 
 # get long and lat from your data.frame. Make sure that the order is in lon/lat.
 xy <- BushData_clean[,c(3,2)]
