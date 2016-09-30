@@ -220,7 +220,7 @@ model3 <- randomForest(x=trainingSet[,c(9:10)],
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
-Predict bush density for shrubs more than 1.5m
+Predict bush density for all shrubs
 ```{r test-a, cache=FALSE}
 predict(covs, model3, filename="otjo_bd3", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
