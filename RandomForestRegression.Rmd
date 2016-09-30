@@ -1,9 +1,18 @@
-# calculate bush density using count data using ndvi and crown cover data as covariates
-# author: Mutua John
-# email: j.y.mutua@cgiar.org
+This R script will enable you calculate bush density using count data and ndvi+crown cover data as covariates.
 
-# workspace clearance
-rm(list = ls(all = TRUE))
+First lets clear our workspace:
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.path = 'figure/rfr-')
+```
+
+To make our results reproducable, let's set a random seed.
+
+```{r test-a, cache=FALSE}
+set.seed(500)
+```
+
 
 # set the random seed 
 set.seed(500)
