@@ -169,11 +169,6 @@ model1 <- randomForest(x=trainingSet[,c(9:10)],
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
-Plot mean decrease in variable importance
-```{r test-a, cache=FALSE}
-varImpPlot(model1, type=1)
-```
-
 Predict bush density for shrubs less than 1.5m
 ```{r test-a, cache=FALSE}
 predict(covs, model1, filename="otjo_bd1", format='GTiff', type="response", 
@@ -193,10 +188,7 @@ model2 <- randomForest(x=trainingSet[,c(9:10)],
                        y=as.factor(trainingSet[,"shrubs_more1.5"]), 
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
-Plot mean decrease in variable importance
-```{r test-a, cache=FALSE}
-varImpPlot(model2, type=1)
-```
+
 Predict bush density for shrubs more than 1.5m
 ```{r test-a, cache=FALSE}
 predict(covs, model2, filename="otjo_bd2", format='GTiff', type="response", 
@@ -208,4 +200,10 @@ print(t2)
 accuracy2 <- sum(testingSet$rightPred2)/nrow(testingSet)
 accuracies2 <- c(accuracies2,accuracy2)
 print(accuracy2)
+```
+
+Plot mean decrease in variable importance
+```{r test-a, cache=FALSE}
+varImpPlot(model2, type=1)
+varImpPlot(model3, type=1)
 ```
