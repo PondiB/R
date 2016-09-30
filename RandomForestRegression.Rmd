@@ -36,7 +36,6 @@ BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName 
 Calculate values by finding the median in crown cover and mean of values for counts
 Note that 1 plot = 0.01 ha; 4 plots = 0.04 ha
 ```{r test-a, cache=FALSE}
-BushData$crown_cover <- apply(BushData[,4:7], 1, median, na.rm=TRUE)
 BushData$shrubs_less_1.5 <- apply(BushData[,8:11], 1, sum, na.rm=TRUE)
 BushData$shrubs_more_1.5_no_stem <- apply(BushData[,16:19], 1, sum, na.rm=TRUE)
 BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, sum, na.rm=TRUE)
@@ -44,20 +43,21 @@ BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, sum, na.rm=TRUE)
 
 Create new data frame with the columns you need
 ```{r test-a, cache=FALSE}
-BushData_clean<-BushData[,c("Waypoint_No","Latitude","Longitude","crown_cover",
+BushData_clean<-BushData[,c("Waypoint_No","Latitude","Longitude",
                             "shrubs_less_1.5","shrubs_more_1.5_no_stem","shrubs_more_1.5_stem")]
 ```
 
-Add a new column of shrubs more than 1.5m
+Add two new columns of shrubs more than 1.5 and all shrubs in general
 ```{r test-a, cache=FALSE}
-BushData_clean$shrubs_more_1.5 <- apply(BushData_clean[,6:7], 1, sum, na.rm=TRUE)
+BushData_clean$shrubs_more_1.5 <- apply(BushData_clean[,5:6], 1, sum, na.rm=TRUE)
+BushData_clean$shrubs_all <- apply(BushData_clean[,4:6], 1, sum, na.rm=TRUE)
 ```
 
 Round columns
 ```{r test-a, cache=FALSE}
-BushData_clean<-BushData_clean %>% mutate_each(funs(round(.,0)), 
-                                               crown_cover, shrubs_less_1.5, 
-                                               shrubs_more_1.5_no_stem, shrubs_more_1.5_stem, shrubs_more_1.5)
+BushData_clean<-BushData_clean %>% mutate_each(funs(round(.,0)), shrubs_less_1.5, 
+                                               shrubs_more_1.5_no_stem, shrubs_more_1.5_stem, 
+                                               shrubs_more_1.5, shrubs_all)
 ```
 
 Remove all NAs
@@ -82,6 +82,11 @@ trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south +datum=WGS
 Let's do some background checking of the field names
 ```{r test-a, cache=FALSE}
 names(trainData)
+```
+rename trainData fields
+```{r test-a, cache=FALSE}
+names(trainData) <- c("Waypoint_No","Latitude","Longitude","shrubs_less_1.5",
+                      "shrubs_more_1.5_no_stem", "shrubs_more_1.5_stem", "shrubs_more_1.5", "shrubs_all")
 ```
 
 Import the rest of input data
@@ -129,8 +134,8 @@ trainData@data=data.frame(trainData@data, v[match(rownames(trainData@data),rowna
 
 Rename fields in training dataset, remove NAs and write the dataset as a .csv
 ```{r test-a, cache=FALSE}
-names(trainData) <- c("waypoint_no","latitude","longitude","crown_cover2", 
-                      "shrubs_less1.5","shrubs_more1.5_no_stem","shrubs_more1.5_stem","shrubs_more1.5",
+names(trainData) <- c("waypoint_no","latitude","longitude","shrubs_less1.5",
+                      "shrubs_more1.5_no_stem","shrubs_more1.5_stem","shrubs_more1.5", "shrubs_all",
                       "crown_cover","NDVI","band2","band3","band4","band5","band6","band7")
 trainData@data<-trainData@data[complete.cases(trainData@data),]
 write.csv(trainData@data, file = "Otjozondjupa_MF_trainData.csv",row.names=FALSE)
@@ -144,7 +149,7 @@ trainingSet=trainData@data[trainIndex,]
 testingSet=trainData@data[-trainIndex,]
 ```
 
-Let's plot  some of the variable
+Let's plot  some of the variables
 ```{r test-a, cache=FALSE}
 scatterplot(NDVI ~ shrubs_less1.5+crown_cover, data=trainingSet, 
             xlab="Count of Shrubs less than 1.5m",ylab="NDVI", main="NDVI versus Count of Shrubs (less than 1.5m)")
@@ -165,7 +170,7 @@ accuracies3<-c()
 Construct the rf model for shrubs less than 1.5m
 ```{r test-a, cache=FALSE}
 model1 <- randomForest(x=trainingSet[,c(9:10)],
-                       y=as.factor(trainingSet[,"shrubs_less1.5"]), 
+                       y=trainingSet[,"shrubs_less1.5"], 
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
@@ -185,7 +190,7 @@ print(accuracy1)
 Construct the rf model for shrubs more than 1.5m
 ```{r test-a, cache=FALSE}
 model2 <- randomForest(x=trainingSet[,c(9:10)],
-                       y=as.factor(trainingSet[,"shrubs_more1.5"]), 
+                       y=trainingSet[,"shrubs_more1.5"], 
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
@@ -204,6 +209,33 @@ print(accuracy2)
 
 Plot mean decrease in variable importance
 ```{r test-a, cache=FALSE}
+varImpPlot(model2, type=1)
+varImpPlot(model3, type=1)
+```
+
+Construct the rf model for for all shrubs
+```{r test-a, cache=FALSE}
+model3 <- randomForest(x=trainingSet[,c(9:10)],
+                       y=trainingSet[,"shrubs_all"], 
+                       ntree=2000, proximity=TRUE, importance=TRUE)
+```
+
+Predict bush density for shrubs more than 1.5m
+```{r test-a, cache=FALSE}
+predict(covs, model3, filename="otjo_bd3", format='GTiff', type="response", 
+        index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
+prediction3 <- predict(model3, testingSet)
+testingSet$rightPred3 <- prediction3 == testingSet$shrubs_all
+t3<-table(prediction3, testingSet$shrubs_all)
+print(t3)
+accuracy3 <- sum(testingSet$rightPred3)/nrow(testingSet)
+accuracies3 <- c(accuracies3,accuracy3)
+print(accuracy3)
+```
+
+Plot mean decrease in variable importance
+```{r test-a, cache=FALSE}
+varImpPlot(model1, type=1)
 varImpPlot(model2, type=1)
 varImpPlot(model3, type=1)
 ```
