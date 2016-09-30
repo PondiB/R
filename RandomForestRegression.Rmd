@@ -33,7 +33,7 @@ Read in data from excel sheet
 BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
 ```
 
-Calculate values by finding the median in crown cover and mean of values for counts
+Calculate values by finding the median in crown cover and mean of values for counts.
 Note that 1 plot = 0.01 ha; 4 plots = 0.04 ha
 ```{r test-a, cache=FALSE}
 BushData$shrubs_less_1.5 <- apply(BushData[,8:11], 1, sum, na.rm=TRUE)
