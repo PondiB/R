@@ -8,7 +8,7 @@ rm(list = ls(all = TRUE))
 Set up some options (you do not have to do this)
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.path = 'figure/rfr-')
+opts_knit$set(root.dir = "C:/Users/jymutua/WorkDocs/Bush_Density_Mapping")
 ```
 
 To make our results reproducable, let's set a random seed.
@@ -18,12 +18,17 @@ set.seed(500)
 
 Let's list down the packages to be used in this session. Packages will be installed if not already installed.
 They will then be loaded into the session
-
 ```{r}
 .packages = c("sp","rgdal","raster","randomForest","plyr","xlsx","xlsxjars","dplyr","caret","car")
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
+```
+
+To get help on the functions and data sets in R, use `help()` or `?`. For example, to view the help file for the `calc` function, type one of the following:
+```{r help, eval=FALSE}
+help(calc)
+?calc
 ```
 
 Set working directory
