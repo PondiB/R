@@ -128,8 +128,8 @@ trainData@data<-trainData@data[complete.cases(trainData@data),]
 write.csv(trainData@data, file = "Otjo_CrownCover_MF_trainData.csv",row.names=FALSE)
 ```
 
-Randomly select index numbers and use that for splitting the data
-Set 75% as training nad 25% as test data
+Randomly select index numbers and use that for splitting the data.
+Set 75% as training and 25% as test data
 ```{r}
 trainIndex=sample(1:nrow(trainData@data),size=0.75*nrow(trainData@data))
 trainingSet=trainData@data[trainIndex,]
