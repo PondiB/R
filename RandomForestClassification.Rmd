@@ -87,8 +87,8 @@ rstack <- stack(rasList[2:3])
 names(rstack) <- c("NDVI", "band2", "band3", "band4", "band5", "band6", "band7")
 ```
 
-Note that we are only calculating crown cover in the bush area LULC catageory
-Import the bush area mask
+Note that we are only calculating crown cover in the bush area LULC catageory. Let's
+import the bush area mask
 ```{r}
 Otjo_BushArea <- raster("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping/Raster_data/Other_data/Otjozondjupa_BushArea_2016.tif")
 ```
