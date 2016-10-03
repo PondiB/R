@@ -1,0 +1,167 @@
+This manual will enable you calculate crown cover using ndvi and landsat bands as covariates
+
+First clear your work space
+```{r}
+rm(list = ls(all = TRUE))
+```
+
+Set up some options (you do not have to do this)
+```{r setup, include=FALSE}
+library(knitr)
+opts_knit$set(root.dir = "C:/Users/jymutua/WorkDocs/Bush_Density_Mapping")
+```
+
+To make our results reproducable, let's set a random seed.
+```{r}
+set.seed(500)
+```
+
+Let's list down the packages to be used in this session. Packages will be installed if not already installed.
+They will then be loaded into the session
+```{r}
+.packages = c("sp","rgdal","raster","randomForest","plyr","xlsx","xlsxjars","dplyr","caret","car")
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+lapply(.packages, require, character.only=TRUE)
+```
+
+To get help on the functions and data sets in R, use `help()` or `?`. For example, to view the help file for the `calc` function, type one of the following:
+```{r help, eval=FALSE}
+help(calc)
+?calc
+```
+
+Set your working directory
+```{r}
+setwd("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping")
+```
+
+Read in data from excel sheet
+```{r}
+BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
+```
+
+Calculate values by finding the median in crown cover
+```{r}
+BushData$crown_cover <- apply(BushData[,4:7], 1, median, na.rm=TRUE)
+```
+
+Create a new data frame with the columns you need
+```{r}
+CrownCover<-BushData[,c("Waypoint_No","Latitude","Longitude", "crown_cover")]
+```
+
+Round columns and remove NAs
+```{r}
+CrownCover<-CrownCover %>% mutate_each(funs(round(.,0)), crown_cover)
+CrownCover<-CrownCover[complete.cases(CrownCover),]
+```
+
+Export data to .csv
+```{r}
+write.csv(CrownCover, file = "Otjo_CrownCover_trainData.csv",row.names=FALSE)
+```
+
+Get long and lat from your data.frame. Make sure that the order is in lon/lat.
+Convert the dataraframe into a spatial point dataframe
+```{r}
+xy <- BushData_clean[,c(3,2)]
+trainDatageo <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
+                                    proj4string = CRS("+proj=longlat +datum=WGS84"))
+trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south +datum=WGS84'))
+
+Let's do some background checking of the field names
+```{r}
+names(trainData)
+```
+
+Import the rest of input data
+```{r}
+rasList <- list.files("Raster_data/", pattern = ".tif$", full.names = TRUE)
+```
+
+Create a raster stack and rename the contents
+```{r}
+rstack <- stack(rasList[2:3])
+names(rstack) <- c("NDVI", "band2", "band3", "band4", "band5", "band6", "band7")
+```
+
+Note that we are only calculating crown cover in the bush area LULC catageory
+Import the bush area mask
+```{r}
+Otjo_BushArea <- raster("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping/Raster_data/Other_data/Otjozondjupa_BushArea_2016.tif")
+```
+
+Let's check various stuff
+```{r}
+crs(rstack)
+crs(Otjo_BushArea)
+crs(trainData)
+extent(rstack)
+extent(Otjo_BushArea)
+extent(trainData)
+```
+
+Set extent of the training data to match covs
+```{r}
+trainData@bbox <- bbox(Otjo_BushArea)
+```
+
+Mask, read and stack the covariates
+```{r}
+covs <- mask(rstack, Otjo_BushArea)
+writeRaster(covs, filename = "Otjozondjupa_Stack_2016.tif", format = "GTiff", overwrite = TRUE)
+```
+
+Assign raster values to the training data
+```{r}
+v<-as.data.frame(extract(covs,trainData))
+trainData@data=data.frame(trainData@data, v[match(rownames(trainData@data),rownames(v)),])
+```
+
+Rename fields in training dataset, remove NAs and write the dataset as a .csv
+```{r}
+names(trainData) <- c("waypoint_no", "latitude", "longitude", "crown_cover", 
+                      "NDVI","band2","band3","band4","band5","band6","band7")
+trainData@data<-trainData@data[complete.cases(trainData@data),]
+write.csv(trainData@data, file = "Otjo_CrownCover_MF_trainData.csv",row.names=FALSE)
+```
+
+Randomly select index numbers and use that for splitting the data
+Set 75% as training nad 25% as test data
+```{r}
+trainIndex=sample(1:nrow(trainData@data),size=0.75*nrow(trainData@data))
+trainingSet=trainData@data[trainIndex,]
+testingSet=trainData@data[-trainIndex,]
+
+You can now set up the model using randomly sampled data
+```{r}
+accuracies<-c()
+cc_model <- randomForest(x=trainingSet[,c(5:6)],
+                         y=as.factor(trainingSet[,"crown_cover"]), 
+                         ntree=2000, proximity=TRUE, importance=TRUE)
+````
+
+Check for error convergence
+```{r}
+plot(cc_model)
+print(cc_model)
+```
+
+Predict crown cover
+```{r}
+predict(covs, cc_model, filename="Otjozondjupa_CrownCover_2016", format='GTiff', type="response", 
+        index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
+prediction <- predict(cc_model, testingSet)
+testingSet$rightPred <- prediction == testingSet$crown_cover
+t<-table(prediction, testingSet$crown_cover)
+print(t)
+accuracy <- sum(testingSet$rightPred)/nrow(testingSet)
+accuracies <- c(accuracies,accuracy)
+print(accuracy)
+```
+
+Plot mean decrease in variable importance
+```{r}
+varImpPlot(cc_model, type=1)
+```

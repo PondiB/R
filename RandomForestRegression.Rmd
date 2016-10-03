@@ -109,7 +109,7 @@ names(rstack) <- c("crown_cover","NDVI","band2","band3","band4","band5","band6",
 ```
 
 Note that we are only calculating bush density in the bush area LULC catageory
-Import teh bush area mask
+Import the bush area mask
 ```{r}
 Otjo_BushArea <- raster("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping/Raster_data/Other_data/Otjozondjupa_BushArea_2016.tif")
 ```
@@ -128,6 +128,7 @@ Set extent of the training data to match covs
 ```{r}
 trainData@bbox <- bbox(Otjo_BushArea)
 ```
+
 Mask, read and stack the covariates
 ```{r}
 covs <- mask(rstack, Otjo_BushArea)
