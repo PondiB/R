@@ -69,6 +69,7 @@ xy <- BushData_clean[,c(3,2)]
 trainDatageo <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
                                     proj4string = CRS("+proj=longlat +datum=WGS84"))
 trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south +datum=WGS84'))
+```
 
 Let's do some background checking of the field names
 ```{r}
