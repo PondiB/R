@@ -134,6 +134,7 @@ Set 75% as training and 25% as test data
 trainIndex=sample(1:nrow(trainData@data),size=0.75*nrow(trainData@data))
 trainingSet=trainData@data[trainIndex,]
 testingSet=trainData@data[-trainIndex,]
+```
 
 You can now set up the model using randomly sampled data
 ```{r}
