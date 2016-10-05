@@ -1,5 +1,7 @@
 This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
 
+Download the sample dataset from this link <https://www.dropbox.com/s/shx0vmpgcfuivfs/NDVI_data.zip?dl=0>
+
 First clear your work space:
 ```{r}
 rm(list = ls(all = TRUE))
@@ -7,7 +9,7 @@ rm(list = ls(all = TRUE))
 
 ```{r "setup", include=FALSE}
 require("knitr")
-opts_knit$set(root.dir = "D:/ToBackup/Data/Regional/LDN_Namibia/NDVI_Modis/AOI_NDVI")
+opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
 ### Preliminaries
@@ -26,7 +28,7 @@ library(gridExtra) #arranging plots
 
 Set your working directory as follows:
 ```{r}
-setwd("D:/ToBackup/Data/Regional/LDN_Namibia/NDVI_Modis/AOI_NDVI")
+setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
 This needs to be done every time you start R. (There is a way to have the package loaded automatically every time, but we won't discuss that here.):
@@ -40,13 +42,12 @@ help(calc)
 
 Import all NDVI raster datasets in your working directory and create a raster stack
 ```{r}
-NDVI_Otjo_stack <- stack(list.files(getwd(), full.names = TRUE, pattern = ".tif$"))
+NDVI_Otji_stack <- stack(list.files(getwd(), full.names = TRUE, pattern = ".tif$"))
 ```
 
-Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position
-while characters corresponding to the date are located between the 24 and 26 position
+Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position, while characters corresponding to the date are located between the 24 and 26 position
 ```{r}
-oldnames<-names(NDVI_Otjo_stack)
+oldnames<-names(NDVI_Otji_stack)
 head(oldnames)
 year<-substr(oldnames,20,23)
 table(year)
@@ -55,22 +56,22 @@ julianDay<-substr(oldnames,24,26)
 
 Calculate mean NDVI for each raster and convert output array to a data frame
 ```{r}
-avg_NDVI_Otjo <- as.data.frame(cellStats(NDVI_Otjo_stack,mean))
+avg_NDVI_Otji <- as.data.frame(cellStats(NDVI_Otji_stack,mean))
 ```
 
 Rename the NDVI column
 ```{r}
-names(avg_NDVI_Otjo) <- "meanNDVI"
+names(avg_NDVI_Otji) <- "meanNDVI"
 ```
 
 Add julianDay values as a column in the data frame
 ```{r}
-avg_NDVI_Otjo$julianDay <- julianDay
+avg_NDVI_Otji$julianDay <- julianDay
 ```
 
 Check out the class in the new column
 ```{r}
-class(avg_NDVI_Otjo$julianDay)
+class(avg_NDVI_Otji$julianDay)
 ```
 
 Create a time vector and convert it to a date
@@ -81,19 +82,19 @@ timeNDVI<-as.Date(tVector,format = "%Y-%j")
 
 Add date values as a column in the data frame
 ```{r}
-avg_NDVI_Otjo$date <- timeNDVI
+avg_NDVI_Otji$date <- timeNDVI
 ```
 
 Check out classes of the two columns now
 ```{r}
-class(avg_NDVI_Otjo$date)
-class(avg_NDVI_Otjo$julianDay)
+class(avg_NDVI_Otji$date)
+class(avg_NDVI_Otji$julianDay)
 ```
 
 Add site and year columns to the data frame
 ```{r}
-avg_NDVI_Otjo$site <- "Otjozondjupa Region"
-avg_NDVI_Otjo$year <- year
+avg_NDVI_Otji$site <- "Otjiwarongo Region"
+avg_NDVI_Otji$year <- year
 ```
 
 ### Plot time series
@@ -101,32 +102,32 @@ avg_NDVI_Otjo$year <- year
 Plot NDVI by year although this doesn't make sense
 
 ```{r}
-ggplot(avg_NDVI_Otjo, aes(year, meanNDVI), na.rm=TRUE) +
+ggplot(avg_NDVI_Otji, aes(year, meanNDVI), na.rm=TRUE) +
   geom_point(size=4,colour = "PeachPuff4") + 
-  ggtitle("MODIS Derived NDVI - Otjozondjupa Region") +
+  ggtitle("MODIS Derived NDVI - Otjiwarongo Region") +
   xlab("Time") + ylab("Mean NDVI") +
   theme(text = element_text(size=20))
 ```
 
 Write NDVI data to a comma separated file in your local drive
 ```{r}
-Otjo_NDVI_Values<-avg_NDVI_Otjo
+Otji_NDVI_Values<-avg_NDVI_Otji
 ```
 
 Drop the _row.names_ column
 ```{r}
-row.names(Otjo_NDVI_Values)<-NULL
-write.csv(Otjo_NDVI_Values, file="meanNDVI_Otjo_2005-2015.csv")
+row.names(Otji_NDVI_Values)<-NULL
+write.csv(Otji_NDVI_Values, file="meanNDVI_Otji_2005-2015.csv")
 ```
 
 Add month to data frame
 ```{r}
-avg_NDVI_Otjo$month  <- month(avg_NDVI_Otjo$date)
+avg_NDVI_Otji$month  <- month(avg_NDVI_Otji$date)
 ```
 
 Subset data by season by creating a new categorical variable called season by grouping months together
 ```{r}
-avg_NDVI_Otjo_Seasons <- avg_NDVI_Otjo %>% 
+avg_NDVI_Otji_Seasons <- avg_NDVI_Otji %>% 
   mutate(season = 
            ifelse(month %in% c(12, 1, 2, 3, 4, 5), "Hot-Wet",
                   ifelse(month %in% c(6, 7, 8), "Cool-Dry",
@@ -135,17 +136,17 @@ avg_NDVI_Otjo_Seasons <- avg_NDVI_Otjo %>%
 
 Let's check to see if that worked
 ```{r}
-head(avg_NDVI_Otjo_Seasons$month)
-head(avg_NDVI_Otjo_Seasons$season)
-tail(avg_NDVI_Otjo_Seasons$month)
-tail(avg_NDVI_Otjo_Seasons$season)
+head(avg_NDVI_Otji_Seasons$month)
+head(avg_NDVI_Otji_Seasons$season)
+tail(avg_NDVI_Otji_Seasons$month)
+tail(avg_NDVI_Otji_Seasons$season)
 ```
 
 ### Start of monthly plots
 
 Aggregate data by month
 ```{r}
-monthNDVI<-avg_NDVI_Otjo_Seasons %>%
+monthNDVI<-avg_NDVI_Otji_Seasons %>%
   group_by(month) %>%
   summarise(monthNDVI=mean(meanNDVI, na.rm=TRUE))
 ```
@@ -178,7 +179,7 @@ Monthly_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjozondjupa_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
 ### Start of indivindual seasonal plots
@@ -200,7 +201,7 @@ Hot_Wet_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjozondjupa_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
 Plot COOL-DRY Season
@@ -218,7 +219,7 @@ Cool_Dry_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjozondjupa_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
 Plot HOT DRY Season
@@ -236,13 +237,13 @@ Hot_Dry_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjozondjupa_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
 ### Start of merged seasonal plots
 Let's aggregate data by season
 ```{r}
-seasonNDVI<-avg_NDVI_Otjo_Seasons %>%
+seasonNDVI<-avg_NDVI_Otji_Seasons %>%
   group_by(year, season) %>%
   summarise(seasonNDVI=mean(meanNDVI, na.rm=TRUE))
 ```
@@ -266,11 +267,11 @@ Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
 Seasonal_NDVI_Plot + facet_grid(. ~ season)
-ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
 
 Plot the same plot in a landscape orientation, save as .pdf
 ```{r}
 Seasonal_NDVI_Plot + facet_grid(season ~ .)
-ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
 ```
