@@ -8,7 +8,7 @@ rm(list = ls(all = TRUE))
 Set up some options (you do not have to do this)
 ```{r setup, include=FALSE}
 library(knitr)
-opts_knit$set(root.dir = "C:/Users/jymutua/WorkDocs/Bush_Density_Mapping")
+opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
 ```
 
 To make our results reproducable, let's set a random seed.
@@ -33,12 +33,12 @@ help(calc)
 
 Set working directory
 ```{r}
-setwd("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping")
+setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
 ```
 
 Read in data from excel sheet
 ```{r}
-BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
+BushData <- read.xlsx("Field_data/Otji_BD_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
 ```
 
 Calculate values by finding the median in crown cover and mean of values for counts.
@@ -75,7 +75,7 @@ BushData_clean<-BushData_clean[complete.cases(BushData_clean),]
 
 Export data to .csv
 ```{r}
-write.csv(BushData_clean, file = "Otjozondjupa_BushData_trainData.csv",row.names=FALSE)
+write.csv(BushData_clean, file = "Otji_BushData_trainData.csv",row.names=FALSE)
 ```
 
 Get long and lat from your data.frame. Make sure that the order is in lon/lat.
@@ -111,7 +111,7 @@ names(rstack) <- c("crown_cover","NDVI","band2","band3","band4","band5","band6",
 Note that we are only calculating bush density in the bush area LULC catageory
 Import the bush area mask
 ```{r}
-Otjo_BushArea <- raster("C:/Users/jymutua/WorkDocs/Bush_Density_Mapping/Raster_data/Other_data/Otjozondjupa_BushArea_2016.tif")
+Otjo_BushArea <- raster("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Bush_Density_Mapping/Raster_data/Other_data/Otji_BushArea_2016.tif")
 ```
 
 Let's check various stuff
@@ -132,7 +132,7 @@ trainData@bbox <- bbox(Otjo_BushArea)
 Mask, read and stack the covariates
 ```{r}
 covs <- mask(rstack, Otjo_BushArea)
-writeRaster(covs, filename = "Otjozondjupa_Stack_2016.tif", format = "GTiff", overwrite = TRUE)
+writeRaster(covs, filename = "Otji_Stack_2016.tif", format = "GTiff", overwrite = TRUE)
 ```
 
 Assign raster values to the training data
@@ -147,7 +147,7 @@ names(trainData) <- c("waypoint_no","latitude","longitude","shrubs_less1.5",
                       "shrubs_more1.5_no_stem","shrubs_more1.5_stem","shrubs_more1.5", "shrubs_all",
                       "crown_cover","NDVI","band2","band3","band4","band5","band6","band7")
 trainData@data<-trainData@data[complete.cases(trainData@data),]
-write.csv(trainData@data, file = "Otjozondjupa_MF_trainData.csv",row.names=FALSE)
+write.csv(trainData@data, file = "Otji_MF_trainData.csv",row.names=FALSE)
 ````
 
 Randomly select index numbers and use that for splitting the data
@@ -185,7 +185,7 @@ model1 <- randomForest(x=trainingSet[,c(9:10)],
 
 Predict bush density for shrubs less than 1.5m
 ```{r}
-predict(covs, model1, filename="otjo_bd1", format='GTiff', type="response", 
+predict(covs, model1, filename="otji_bd1", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
 prediction1 <- predict(model1, testingSet)
 testingSet$rightPred1 <- prediction1 == testingSet$shrubs_less1.5
@@ -205,7 +205,7 @@ model2 <- randomForest(x=trainingSet[,c(9:10)],
 
 Predict bush density for shrubs more than 1.5m
 ```{r}
-predict(covs, model2, filename="otjo_bd2", format='GTiff', type="response", 
+predict(covs, model2, filename="otji_bd2", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
 prediction2 <- predict(model2, testingSet)
 testingSet$rightPred2 <- prediction2 == testingSet$shrubs_more1.5
@@ -225,7 +225,7 @@ model3 <- randomForest(x=trainingSet[,c(9:10)],
 
 Predict bush density for all shrubs
 ```{r}
-predict(covs, model3, filename="otjo_bd3", format='GTiff', type="response", 
+predict(covs, model3, filename="otji_bd3", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
 prediction3 <- predict(model3, testingSet)
 testingSet$rightPred3 <- prediction3 == testingSet$shrubs_all
