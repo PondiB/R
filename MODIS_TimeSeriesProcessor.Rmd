@@ -1,6 +1,6 @@
 This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
 
-Download the sample dataset from this link <https://www.dropbox.com/s/shx0vmpgcfuivfs/NDVI_data.zip?dl=0>
+Download the sample dataset from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
 
 First clear your work space:
 ```{r}

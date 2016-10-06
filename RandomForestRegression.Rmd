@@ -1,5 +1,7 @@
 This manual will help you calculate bush density using count data and ndvi+crown cover data as covariates.
 
+Download the sample dataset from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQcGZGc1ZWRnpZc0U>
+
 First clear your work space
 ```{r}
 rm(list = ls(all = TRUE))
