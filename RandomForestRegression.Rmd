@@ -236,9 +236,9 @@ accuracies3 <- c(accuracies3,accuracy3)
 print(accuracy3)
 ```
 
-Plot mean decrease in variable importance
+print all the models
 ```{r}
-varImpPlot(model1, type=1)
-varImpPlot(model2, type=1)
-varImpPlot(model3, type=1)
+print(model1)
+print(model2)
+print(model3)
 ```
