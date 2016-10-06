@@ -38,7 +38,7 @@ setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Bush_Density_Mappi
 
 Read in data from excel sheet
 ```{r}
-BushData <- read.xlsx("Field_data/Otji_BD_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
+BushData <- read.xlsx("Field_data/Otji_BD_Sampling_Points.xlsx", sheetName = "Sheet1", header=TRUE)
 ```
 
 Calculate values by finding the median in crown cover and mean of values for counts.
