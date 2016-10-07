@@ -1,6 +1,7 @@
 ### Objectives
 This manual will help you construct a time series using MODIS data.
 At the end of this session, you will be able to:
+
 1.Download MODIS data
 2.Import the data into R software
 3.Insert a temporal ID into the data
