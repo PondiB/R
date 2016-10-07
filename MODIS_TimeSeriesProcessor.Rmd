@@ -2,11 +2,11 @@
 This manual will help you construct a time series using MODIS data.
 At the end of this session, you will be able to:
 
-1.Download MODIS data
-2.Import the data into R software
-3.Insert a temporal ID into the data
-4.Create a time series
-5.Plot and export graphs for reports
+1.  Download MODIS data
+2.  Import the data into R software
+3.  Insert a temporal ID into the data
+4.  Create a time series
+5.  Plot and export graphs for reports
 
 For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise,
 download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
