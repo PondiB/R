@@ -1,3 +1,8 @@
+---
+title: "NDVI time series analysis manual"
+output: pdf
+---
+
 ## NDVI time series analysis
 
 ### Objectives
@@ -12,15 +17,15 @@ At the end of this session, you will be able to:
 For more details on source of MODIS data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise,
 download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
 
-Before you start this session, it is important you have (i) the latest [R software] (https://cran.r-project.org/bin/windows/base/) and (ii) [Rstudio](https://www.rstudio.com/) installed in your computer.
+Before you start this session, it is important you have (i) the latest [R software](https://cran.r-project.org/bin/windows/base/) and (ii) [Rstudio](https://www.rstudio.com/) installed in your computer.
 
 You can now start the session but first clear your work space:
 ```{r}
 rm(list = ls(all = TRUE))
 ```
 
-```{r "setup" echo=FALSE}
-require("knitr")
+```{r echo=FALSE}
+library("knitr")
 opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
@@ -120,13 +125,9 @@ ggplot(avg_NDVI_Otji, aes(year, meanNDVI), na.rm=TRUE) +
   theme(text = element_text(size=20))
 ```
 
-Write NDVI data to a comma separated file in your local drive
+Write NDVI data to a comma separated file in your local drive, Drop the row names column
 ```{r}
 Otji_NDVI_Values<-avg_NDVI_Otji
-```
-
-Drop the _row.names_ column
-```{r}
 row.names(Otji_NDVI_Values)<-NULL
 write.csv(Otji_NDVI_Values, file="meanNDVI_Otji_2005-2015.csv")
 ```
@@ -167,7 +168,7 @@ Convert month numeric to month abbreviation
 monthNDVI$month_name <- month.abb[monthNDVI$month]
 ```
 
-Reassign the "month_name"" field to a factor
+Reassign the 'month_name' field to a factor
 ```{r}
 monthNDVI$month_name = factor(monthNDVI$month_name,
                               levels=c('Jan','Feb','Mar',
