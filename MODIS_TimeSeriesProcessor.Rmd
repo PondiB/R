@@ -1,6 +1,8 @@
 ---
-title: "NDVI time series analysis manual"
-output: pdf
+title: "NDVI time series analysis"
+author: John Mutua
+date: October 07, 2016
+output: pdf_document
 ---
 
 ## NDVI time series analysis
