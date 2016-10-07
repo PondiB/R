@@ -19,7 +19,7 @@ You can now start the session but first clear your work space:
 rm(list = ls(all = TRUE))
 ```
 
-```{r "setup"}
+```{r "setup" echo=FALSE}
 require("knitr")
 opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
