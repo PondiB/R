@@ -1,8 +1,12 @@
 ---
 title: "NDVI time series analysis"
 author: John Mutua
-date: October 07, 2016
-output: pdf_document
+date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+output:
+  pdf_document:
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
 ---
 
 ## NDVI time series analysis
