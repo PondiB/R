@@ -12,14 +12,14 @@ At the end of this session, you will be able to:
 For more details on source of MODIS data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise,
 download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
 
-Before you start this session, it is important you have (i) the latest [R software] (https://cran.r-project.org/bin/windows/base/) and (ii) [R studio](https://www.rstudio.com/) installed in your computer.
+Before you start this session, it is important you have (i) the latest [R software] (https://cran.r-project.org/bin/windows/base/) and (ii) [Rstudio](https://www.rstudio.com/) installed in your computer.
 
-Clear your work space:
+You can now start the session but first clear your work space:
 ```{r}
 rm(list = ls(all = TRUE))
 ```
 
-```{r "setup", include=FALSE}
+```{r "setup"}
 require("knitr")
 opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
