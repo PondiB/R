@@ -1,6 +1,14 @@
-This manual will help you construct a time series using MODIS data from the Global Agriculture Monitoring (GLAM) Project. For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>.
+### Objectives
+This manual will help you construct a time series using MODIS data.
+At the end of this session, you will be able to
+-Download MODIS data
+-Import the data into R software
+-Insert a temporal ID into the data
+-Create a time series
+-Plot and export graphs for reports
 
-Download the sample dataset from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
+For more details on source of data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise,
+download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
 
 First clear your work space:
 ```{r}
@@ -31,8 +39,7 @@ Set your working directory as follows:
 setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
-This needs to be done every time you start R. (There is a way to have the package loaded automatically every time, but we won't discuss that here.):
-
+This needs to be done every time you start R. (There is a way to have the package loaded automatically every time, but we won't discuss that here).
 To get help on the functions and data sets in R, use `help()` or `?`. For example, to view the help file for the `calc` function, type one of the following:
 
 ```{r help, eval=FALSE}
