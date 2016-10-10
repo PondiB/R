@@ -159,7 +159,7 @@ plot(trainData, add=TRUE, col = "red", pch = 3)
 Mask, read and stack the covariates
 ```{r}
 covs <- mask(rstack, Otjo_BushArea)
-writeRaster(covs, filename = "Otji_Stack_2016.tif", format = "GTiff", overwrite = TRUE)
+# writeRaster(covs, filename = "Otji_Stack_2016.tif", format = "GTiff", overwrite = TRUE)
 ```
 
 Assign raster values to the training data
@@ -187,14 +187,18 @@ testingSet=trainData@data[-trainIndex,]
 
 Let's plot  some of the variables
 ```{r}
-scatterplot(NDVI ~ shrubs_less1.5+crown_cover, data=trainingSet, 
-            xlab="Count of Shrubs less than 1.5m",ylab="NDVI", main="NDVI versus Count of Shrubs (less than 1.5m)")
+scatterplot(NDVI ~ shrubs_less1.5|crown_cover, data=trainingSet, 
+            xlab="Count of Shrubs less than 1.5m",ylab="NDVI", 
+            main="NDVI versus Count of Shrubs (less than 1.5m)")
 scatterplot(NDVI ~ shrubs_more1.5, data=trainingSet, 
-            xlab="Count of shrub (more than 1.5m)",ylab="NDVI", main="NDVI versus Count of shrub (more than 1.5m)")
+            xlab="Count of shrub (more than 1.5m)",ylab="NDVI", 
+            main="NDVI versus Count of shrub (more than 1.5m)")
 scatterplot(shrubs_more1.5 ~ crown_cover, data=trainingSet, 
-            xlab="Crown cover",ylab="shrubs_more1.5", main="shrubs_more1.5 versus Crown cover")
+            xlab="Crown cover",ylab="shrubs_more1.5", 
+            main="shrubs_more1.5 versus Crown cover")
 scatterplot(shrubs_less1.5 ~ crown_cover, data=trainingSet, 
-            xlab="Crown cover",ylab="shrubs_less1.5", main="shrubs_less1.5 versus Crown cover")
+            xlab="Crown cover",ylab="shrubs_less1.5", 
+            main="shrubs_less1.5 versus Crown cover")
 ```
 
 You can now set up the model using randomly sampled data
@@ -210,10 +214,11 @@ model1 <- randomForest(x=trainingSet[,c(9:10)],
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
-Predict bush density for shrubs less than 1.5m
+Predict density for shrubs less than 1.5m
 ```{r}
-predict(covs, model1, filename="otji_bd1", format='GTiff', type="response", 
+otji_bd1<-predict(covs, model1, filename="otji_bd1", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
+plot(otji_bd1, main="Density for shrubs less than 1.5m")
 prediction1 <- predict(model1, testingSet)
 testingSet$rightPred1 <- prediction1 == testingSet$shrubs_less1.5
 t1<-table(prediction1, testingSet$shrubs_less1.5)
@@ -230,10 +235,11 @@ model2 <- randomForest(x=trainingSet[,c(9:10)],
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
-Predict bush density for shrubs more than 1.5m
+Predict density for shrubs more than 1.5m
 ```{r}
-predict(covs, model2, filename="otji_bd2", format='GTiff', type="response", 
+otji_bd2<-predict(covs, model2, filename="otji_bd2", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
+plot(otji_bd2, main="Density for shrubs more than 1.5m")
 prediction2 <- predict(model2, testingSet)
 testingSet$rightPred2 <- prediction2 == testingSet$shrubs_more1.5
 t2<-table(prediction2, testingSet$shrubs_more1.5)
@@ -250,10 +256,11 @@ model3 <- randomForest(x=trainingSet[,c(9:10)],
                        ntree=2000, proximity=TRUE, importance=TRUE)
 ```
 
-Predict bush density for all shrubs
+Predict density for all shrubs
 ```{r}
-predict(covs, model3, filename="otji_bd3", format='GTiff', type="response", 
+otji_bd3<-predict(covs, model3, filename="otji_bd3", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
+plot(otji_bd3, main="Density for all shrubs")
 prediction3 <- predict(model3, testingSet)
 testingSet$rightPred3 <- prediction3 == testingSet$shrubs_all
 t3<-table(prediction3, testingSet$shrubs_all)
