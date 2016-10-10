@@ -9,8 +9,6 @@ output:
     fig_caption: true
 ---
 
-## NDVI time series analysis
-
 ### Objectives
 This manual will help you construct a time series using MODIS data.
 At the end of this session, you will be able to:
