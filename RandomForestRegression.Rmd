@@ -150,10 +150,10 @@ Set extent of the training data to match covs
 trainData@bbox <- bbox(Otjo_BushArea)
 ```
 
-Let's plot teh two datasets i.e. training and covariates
+Let's plot the points ontop of `layer 3` of the raster stack
 ```{r}
-plot(trainData)
-plot(rstack[1],add=TRUE)
+plot(rstack[[3]])
+plot(trainData, add=TRUE, col = "red", pch = 3)
 ```
 
 Mask, read and stack the covariates
