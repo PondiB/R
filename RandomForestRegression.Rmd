@@ -13,8 +13,8 @@ output:
 This manual will help you calculate bush density using count data with ndvi and crown cover data as covariates.
 At the end of this session, you will be able to:
 
-1.  Import excel data into R software
-2.  Import raster data into R software
+1.  Import excel data into R
+2.  Import raster data into R
 3.  Convert data from excel to ESRI point shapefile
 4.  Use the point and raster data to construct a random forest model (RF) 
 5.  Use the RF model to predict bush density in areas we don't have count data
