@@ -218,7 +218,7 @@ Predict density for shrubs less than 1.5m
 ```{r}
 otji_bd1<-predict(covs, model1, filename="otji_bd1", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
-plot(otji_bd1, main="Density for shrubs less than 1.5m")
+plot(otji_bd1, main="Density for shrubs less than 1.5m", axes=FALSE)
 prediction1 <- predict(model1, testingSet)
 testingSet$rightPred1 <- prediction1 == testingSet$shrubs_less1.5
 t1<-table(prediction1, testingSet$shrubs_less1.5)
@@ -239,7 +239,7 @@ Predict density for shrubs more than 1.5m
 ```{r}
 otji_bd2<-predict(covs, model2, filename="otji_bd2", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
-plot(otji_bd2, main="Density for shrubs more than 1.5m")
+plot(otji_bd2, main="Density for shrubs more than 1.5m", axes=FALSE)
 prediction2 <- predict(model2, testingSet)
 testingSet$rightPred2 <- prediction2 == testingSet$shrubs_more1.5
 t2<-table(prediction2, testingSet$shrubs_more1.5)
@@ -260,7 +260,7 @@ Predict density for all shrubs
 ```{r}
 otji_bd3<-predict(covs, model3, filename="otji_bd3", format='GTiff', type="response", 
         index=1, na.rm=TRUE, progress="window", overwrite=TRUE)
-plot(otji_bd3, main="Density for all shrubs")
+plot(otji_bd3, main="Density for all shrubs", axes=FALSE)
 prediction3 <- predict(model3, testingSet)
 testingSet$rightPred3 <- prediction3 == testingSet$shrubs_all
 t3<-table(prediction3, testingSet$shrubs_all)
