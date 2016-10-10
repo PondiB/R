@@ -16,9 +16,9 @@ At the end of this session, you will be able to:
 1.  Import excel data into R software
 2.  Import raster data into R software
 3.  Convert data from excel to ESRI point shapefile
-3.  Use the point and raster data to construct a random forest model (RF) 
-4.  Use the RF model to predict bush density in areas we don't have count data
-4.  Test how accurate the model is
+4.  Use the point and raster data to construct a random forest model (RF) 
+5.  Use the RF model to predict bush density in areas we don't have count data
+6.  Test how accurate the model is
 
 Download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQcGZGc1ZWRnpZc0U>
 
