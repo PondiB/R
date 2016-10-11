@@ -133,6 +133,8 @@ train_sample <- training[sample(1:nrow(training), 1000), ]
 table(train_sample$class)
 ```
 
+###Fitting the Random Forests model
+
 Next let's define and fit the RandomForests model using the 'train' function from the 'caret' packag by specifying the model as a formula with the dependent
 variable (i.e., the land cover types ids) encoded as factors.
 ```{r}
