@@ -1,12 +1,13 @@
 ---
 title: "Land Use Land Cover classification"
-author: John Mutua
-date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+author: "John Mutua"
+date: '`r format(Sys.time(), ''%d %B, %Y, %H:%M'')`'
 output:
   pdf_document:
-    fig_width: 7
+    fig_caption: yes
     fig_height: 6
-    fig_caption: true
+    fig_width: 7
+  html_document: default
 ---
 
 ### Objectives
