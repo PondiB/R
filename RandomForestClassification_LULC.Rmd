@@ -28,23 +28,23 @@ Clear your workspace
 rm(list = ls(all = TRUE))
 ```
 
-```{r echo=FALSE}
-library("knitr")
-opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover")
-```
-
-You need to first set your working directory
-```{r}
-setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover")
-```
-
 Let's set the start of data processing
 ```{r}
 startTime <- Sys.time()
 cat("Start time", format(startTime),"\n")
 ```
 
+```{r echo=FALSE}
+library("knitr")
+opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover")
+```
+
 ###Loading the data in R
+
+You need to first set your working directory
+```{r}
+setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover")
+```
 
 Let's list down the packages to be used in this session. Packages will be installed if not already installed.
 They will then be loaded into the session
