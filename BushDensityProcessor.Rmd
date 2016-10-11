@@ -1,13 +1,13 @@
 ---
 title: "Bush density mapping"
-author: John Mutua
+author: CIAT
 date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
 fontsize: 11pt
 geometry: margin=1in
 output:
   pdf_document:
-    fig_width: 7
-    fig_height: 6
+    fig_width: 6
+    fig_height: 4
     fig_caption: true
 ---
 

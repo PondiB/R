@@ -1,12 +1,13 @@
 ---
 title: "NDVI time series analysis"
-author: John Mutua
+author: CIAT
 date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
 output:
   pdf_document:
-    fig_width: 7
-    fig_height: 6
+    fig_width: 6
+    fig_height: 4.5
     fig_caption: true
+fontsize: 11pt
 ---
 
 ### Objectives
@@ -136,10 +137,10 @@ Plot NDVI by year although this doesn't make sense
 
 ```{r}
 ggplot(avg_NDVI_Otji, aes(year, meanNDVI), na.rm=TRUE) +
-  geom_point(size=4,colour = "PeachPuff4") + 
+  geom_point(size=2,colour = "PeachPuff4") + 
   ggtitle("MODIS Derived NDVI - Otjiwarongo Region") +
   xlab("Time") + ylab("Mean NDVI") +
-  theme(text = element_text(size=20))
+  theme(text = element_text(size=16))
 ```
 
 Write NDVI data to a comma separated file in your local drive, Drop the row 
@@ -203,8 +204,8 @@ Monthly_NDVI_Plot<-ggplot(monthNDVI, aes(month_name, monthNDVI, group=4)) +
   ggtitle("Average NDVI (2005-2015) - Monthly") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 Monthly_NDVI_Plot
 ```
 
@@ -227,8 +228,8 @@ Hot_Wet_NDVI_Plot<-ggplot(Hot_Wet, aes(month_name, monthNDVI, group=1)) +
   ggtitle("Average NDVI (2005-2015) - Hot Wet Season ") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 Hot_Wet_NDVI_Plot
 ```
 
@@ -246,8 +247,8 @@ Cool_Dry_NDVI_Plot<-ggplot(Cool_Dry, aes(month_name, monthNDVI, group=1)) +
   ggtitle("Average NDVI (2005-2015) - Cool Dry Season") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 Cool_Dry_NDVI_Plot
 ```
 
@@ -265,8 +266,8 @@ Hot_Dry_NDVI_Plot<-ggplot(Hot_Dry, aes(month_name, monthNDVI, group=1)) +
   ggtitle("Average NDVI (2005-2015) - Hot Dry Season") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 Hot_Dry_NDVI_Plot
 ```
 
@@ -296,8 +297,8 @@ Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
   ggtitle("Average NDVI (2005-2015) - Seasonal") +
   xlab("Year") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 ```
 
 Plot the same plot as before but with one plot per season, save as .pdf

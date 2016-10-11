@@ -1,12 +1,12 @@
 ---
 title: "Land Use Land Cover classification"
-author: "John Mutua"
+author: CIAT
 date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
 output:
   pdf_document:
     fig_caption: yes
-    fig_height: 6
-    fig_width: 7
+    fig_height: 4
+    fig_width: 6
 ---
 
 ### Objectives
