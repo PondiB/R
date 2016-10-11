@@ -18,10 +18,14 @@ At the end of this session, you will be able to:
 3.  Create a time series
 4.  Plot and export graphs
 
-For more details on source of MODIS data see <http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise,
-download the sample dataset we will use in this session from this link <https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
+For more details on source of MODIS data see 
+<http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise, download the 
+sample dataset we will use in this session from this link 
+<https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
 
-Before you start this session, it is important you have (i) the latest [R software](https://cran.r-project.org/bin/windows/base/) and (ii) [Rstudio](https://www.rstudio.com/) installed in your computer.
+Before you start this session, it is important you have (i) the latest 
+[R software](https://cran.r-project.org/bin/windows/base/) and (ii) 
+[Rstudio](https://www.rstudio.com/) installed in your computer.
 
 You can now start the session but first clear your work space:
 ```{r}
@@ -30,12 +34,14 @@ rm(list = ls(all = TRUE))
 
 ```{r echo=FALSE}
 library("knitr")
-opts_knit$set(root.dir = "C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
+opts_knit$set(root.dir = "C:/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
 ### Preliminaries
 
-You need to first install all the required packages. Type (within R) install packages("name of package") (This needs to be done just once.). You then load the packages using the 'library' function:
+You need to first install all the required packages. Type (within R) install 
+packages("name of package") (This needs to be done just once.). You then load 
+the packages using the 'library' function:
 
 ```{r}
 library(raster) #working with rasters
@@ -49,23 +55,30 @@ library(gridExtra) #arranging plots
 
 Set your working directory as follows:
 ```{r}
-setwd("C:/Users/jymutua/Documents/LDN_Workshop/Sample_dataset/NDVI_data")
+setwd("C:/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
-This needs to be done every time you start R. (There is a way to have the package loaded automatically every time, but we won't discuss that here).
-To get help on the functions and data sets in R, use `help()` or `?`. For example, to view the help file for the `calc` function, type one of the following:
+This needs to be done every time you start R. (There is a way to have the 
+package loaded automatically every time, but we won't discuss that here).
+To get help on the functions and data sets in R, use `help()` or `?`. 
+For example, to view the help file for the `calc` function, type one of the 
+following:
 
 ```{r help, eval=FALSE}
 help(calc)
 ?calc
 ```
 
-Import all NDVI raster datasets in your working directory and create a raster stack
+Import all NDVI raster datasets in your working directory and create a raster 
+stack
 ```{r}
-NDVI_Otji_stack <- stack(list.files(getwd(), full.names = TRUE, pattern = ".tif$"))
+NDVI_Otji_stack <- stack(list.files(getwd(), full.names = TRUE, 
+                                    pattern = ".tif$"))
 ```
 
-Insert a Temporal id to the data frame. Characters corresponding to the year are located between the 20 and 23 position, while characters corresponding to the date are located between the 24 and 26 position
+Insert a Temporal id to the data frame. Characters corresponding to the year 
+are located between the 20 and 23 position, while characters corresponding to 
+the date are located between the 24 and 26 position
 ```{r}
 oldnames<-names(NDVI_Otji_stack)
 head(oldnames)
@@ -129,7 +142,8 @@ ggplot(avg_NDVI_Otji, aes(year, meanNDVI), na.rm=TRUE) +
   theme(text = element_text(size=20))
 ```
 
-Write NDVI data to a comma separated file in your local drive, Drop the row names column
+Write NDVI data to a comma separated file in your local drive, Drop the row 
+names column
 ```{r}
 Otji_NDVI_Values<-avg_NDVI_Otji
 row.names(Otji_NDVI_Values)<-NULL
@@ -141,7 +155,8 @@ Add month to data frame
 avg_NDVI_Otji$month  <- month(avg_NDVI_Otji$date)
 ```
 
-Subset data by season by creating a new categorical variable called season by grouping months together
+Subset data by season by creating a new categorical variable called season by 
+grouping months together
 ```{r}
 avg_NDVI_Otji_Seasons <- avg_NDVI_Otji %>% 
   mutate(season = 
@@ -195,7 +210,8 @@ Monthly_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjiwarongo_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Monthly_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
 
 ### Start of indivindual seasonal plots
@@ -204,7 +220,8 @@ Plot HOT-WET Season
 Hot_Wet <- subset(monthNDVI, month >= 12 | month <= 5)
 target <- c("12", "5", "4", "3", "2", "1")
 Hot_Wet<-Hot_Wet[match(target, Hot_Wet$month),]
-Hot_Wet$month_name <- factor(Hot_Wet$month_name, c("Dec", "Jan", "Feb", "Mar", "Apr", "May"))
+Hot_Wet$month_name <- factor(Hot_Wet$month_name, c("Dec", "Jan", "Feb", "Mar", 
+                                                   "Apr", "May"))
 Hot_Wet_NDVI_Plot<-ggplot(Hot_Wet, aes(month_name, monthNDVI, group=1)) +
   geom_line(colour="red") +
   ggtitle("Average NDVI (2005-2015) - Hot Wet Season ") +
@@ -217,7 +234,8 @@ Hot_Wet_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjiwarongo_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
 
 Plot COOL-DRY Season
@@ -235,7 +253,8 @@ Cool_Dry_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjiwarongo_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
 
 Plot HOT DRY Season
@@ -253,7 +272,8 @@ Hot_Dry_NDVI_Plot
 
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
-ggsave(file="Otjiwarongo_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
 
 ### Start of merged seasonal plots
@@ -283,11 +303,13 @@ Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
 Plot the same plot as before but with one plot per season, save as .pdf
 ```{r}
 Seasonal_NDVI_Plot + facet_grid(. ~ season)
-ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
 
 Plot the same plot in a landscape orientation, save as .pdf
 ```{r}
 Seasonal_NDVI_Plot + facet_grid(season ~ .)
-ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 ```
