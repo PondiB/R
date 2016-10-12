@@ -2,10 +2,12 @@
 title: "Land Use Land Cover classification"
 author: CIAT
 date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+fontsize: 11pt
+geometry: margin=1in
 output:
   pdf_document:
-    fig_caption: yes
-    fig_height: 4
+    fig_caption: true
+    fig_height: 4.5
     fig_width: 6
 ---
 
@@ -84,6 +86,7 @@ I had initially created a set of training areas in a polygon shapefile
 ('Otji_trainingData.shp') 
 which stores the id for each land cover type in a column in the attribute table 
 called ‘LC_Code’ as shown below:
+
 ![Training data as seen in ESRI ArcGIS](C:/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover/figures/training_data_screenshot.png)
 
 Let's import the training data into R as an object of class
