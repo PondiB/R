@@ -22,17 +22,18 @@ m <- matrix(c(0, 36, 1,
 #reclassify
 HSG <- reclassify(CN, m)
 
-#add a Raster Atribute Table(RAT) and define the raster as categorical
-HSG <- ratify(HSG)
+# #add a Raster Atribute Table(RAT) and define the raster as categorical
+# HSG <- ratify(HSG)
 
-#configure the RAT: first create a RAT data.frame using the
-#levels method; second, set the values for each class (to be
-#used by levelplot); third, assign this RAT to the raster
-#using again levels
-rat <- levels(HSG)[[1]]
-rat$classes <- c("B", "C")
-levels(HSG) <- rat
-levelplot(HSG, col.regions=terrain_hcl(4))
+# #configure the RAT: first create a RAT data.frame using the
+# #levels method; second, set the values for each class (to be
+# #used by levelplot); third, assign this RAT to the raster
+# #using again levels
+# rat <- levels(HSG)[[1]]
+# rat$classes <- c("B", "C")
+# levels(HSG) <- rat
+# levelplot(HSG, col.regions=terrain_hcl(4))
 
 #write and plot(r2)
 writeRaster(HSG , filename = "HSG.tif", format = "GTiff", overwrite = TRUE)
+plot(HSG)
