@@ -64,7 +64,6 @@ u4=15
 u5=0
 u6=0
 
-
 ###START LOOP###
 for (i in 1:nrow(df1)){
   
@@ -107,7 +106,6 @@ for (i in 1:nrow(df1)){
   write.table("[CropGro]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("SLPF=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
 
-  
   #################READING SOIL LAYERS#########################
   #exract CLAY per layer, unit (%)
   CLAY1 <- df1$af_CLYPPT_T__M_sd1_250m[i]
