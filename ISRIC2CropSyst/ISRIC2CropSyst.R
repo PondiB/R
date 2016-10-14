@@ -18,6 +18,12 @@ source(paste(src.dir,"/CN_Calculator.R",sep="")) #loading the script
 #calculate Hydrologic Soil groups
 source(paste(src.dir,"/CN2HSG_Calculator.R",sep="")) #loading the script
 
+#calculate slope
+source(paste(src.dir,"/CalculateSlope.R",sep="")) #loading the script
+
+#calculate slope length
+source(paste(src.dir,"/CalculateSlopeLength.R",sep="")) #loading the script
+
 #read and load the soil property .tif files
 rasList <- list.files(".", pattern = ".tif$", full.names = TRUE)
 rStack<-stack(rasList)
@@ -31,10 +37,34 @@ df1 <- as.data.frame(extract(rStack, p))
 
 #recode HSG values to HSG groups
 df1$HSG_code <- ifelse(df1$HSG==1, "A",
-                ifelse(df1$HSG==2, "B",
-                ifelse(df1$HSG==3, "C",
-                ifelse(df1$HSG==4, "D",
-                                NA ))))
+                       ifelse(df1$HSG==2, "B",
+                              ifelse(df1$HSG==3, "C",
+                                     ifelse(df1$HSG==4, "D",
+                                            NA ))))
+
+#define hydrologic conditions
+df1$HC <- ifelse(df1$HSG==1, "GOOD",
+                 ifelse(df1$HSG==2, "GOOD",
+                        ifelse(df1$HSG==3, "GOOD",
+                               ifelse(df1$HSG==4, "GOOD",
+                                      NA ))))
+#set thickness per layer
+L1=0.05
+L2=0.1
+L3=0.15
+L4=0.30
+L5=0.40
+L6=1
+
+#some user values
+u1=15
+u2=15
+u3=15
+u4=15
+u5=0
+u6=0
+
+
 ###START LOOP###
 for (i in 1:nrow(df1)){
   
@@ -46,29 +76,39 @@ for (i in 1:nrow(df1)){
   
   #extracting curve numbers, slope, slope length
   CN <- df1$CN[i]
-  slp <- df1$Sasumua_Slope90m[i]
-  slp_l <- df1$Sasumua_SlopeLength90m[i]
+  slp <- df1$Sasumua_Slope[i]
+  slpl <- df1$Sasumua_SlopeLength[i]
   hg<-df1$HSG_code[i]
+  hc<-df1$HC[i]
   
-  #set number of soil layers
+    #set number of soil layers
   n_layers <- 6
   
   write.table(paste0("hydrologic_group=",hg), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("override_curve_number=",CN), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("hydrologic_condition=",hc), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("override_curve_number=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("compute_surface_storage=","true"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("steepness=",slp), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("slope_length=",slp_l), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("slope_length=",slpl), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("albedo_dry=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("albedo_wet=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("water_vapor_conductance_atmosphere_adj=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("surface_storage=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("fallow_curve_number=",CN), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table("[version]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("major=","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("release","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("minor=","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table("[profile]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("number_layers=",n_layers), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table("[evaporative_layer_thickness]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("cascade=",L1), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("finite_diff=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table("[CropGro]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("SLPF=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+
   
   #################READING SOIL LAYERS#########################
-  #set thickness per layer
-  L1=0.05
-  L2=0.1
-  L3=0.15
-  L4=0.30
-  L5=0.40
-  L6=1
-  
   #exract CLAY per layer, unit (%)
   CLAY1 <- df1$af_CLYPPT_T__M_sd1_250m[i]
   CLAY2 <- df1$af_CLYPPT_T__M_sd2_250m[i]
@@ -134,7 +174,16 @@ for (i in 1:nrow(df1)){
   CEC6 <- df1$af_CEC_T__M_sd6_250m[i]
   
   ################WRITE SOIL DATA TO THE .SIL FILE#################
-  
+  #create a table to write some user parameters
+  write.table("[user_value]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  # Write Thickness parameters on the table
+  write.table(paste0("1=",u1), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("2=",u2), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("3=",u3), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("4=",u4), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("5=",u5), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("6=",u6), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+    
   #create a table to write Thickness parameters
   write.table("[thickness]\nunit=m",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   # Write Thickness parameters on the table
