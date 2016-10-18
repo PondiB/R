@@ -8,9 +8,9 @@ require(rasterVis)
 require(colorspace)
 
 #set working directory
-setwd("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script/data")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
 layers<-list.files(".", pattern='tif')
-CN=raster("CN.tif")
+CN=raster("Sasumua_CN.tif")
 
 # reclassify the values into 4 HSG groups 
 # build the matrix for the reclassification
@@ -35,5 +35,5 @@ HSG <- reclassify(CN, m)
 # levelplot(HSG, col.regions=terrain_hcl(4))
 
 #write and plot(r2)
-writeRaster(HSG , filename = "HSG.tif", format = "GTiff", overwrite = TRUE)
+writeRaster(HSG , filename = "Sasumua_HSG.tif", format = "GTiff", overwrite = TRUE)
 plot(HSG)

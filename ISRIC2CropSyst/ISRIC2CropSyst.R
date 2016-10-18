@@ -7,7 +7,7 @@ rm(list = ls(all = TRUE))
 require(raster) 
 require(rgdal)
 
-setwd("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
 
 #source dir
 src.dir <- "D:/ToBackup/Scripts/R/ISRIC2CropSyst/src"
@@ -29,25 +29,32 @@ rasList <- list.files(".", pattern = ".tif$", full.names = TRUE)
 rStack<-stack(rasList)
 
 #load and read the point shapefile
-p <- shapefile("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script/Farmer_sites.shp")
+p <- shapefile("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered/shapes/sasumua_soil_sites.shp")
 p <- spTransform(p, crs(rStack))
 
-#extract data from .tif files
+#assign raster values to p and create a dataframe out of it
 df1 <- as.data.frame(extract(rStack, p))
+p@data=data.frame(p@data, df1[match(rownames(p@data),rownames(df1)),])
+df1<-as.data.frame(p)
 
 #recode HSG values to HSG groups
-df1$HSG_code <- ifelse(df1$HSG==1, "A",
-                       ifelse(df1$HSG==2, "B",
-                              ifelse(df1$HSG==3, "C",
-                                     ifelse(df1$HSG==4, "D",
-                                            NA ))))
+df1$HSG_code[df1$Sasumua_HSG==1] <- "A"
+df1$HSG_code[df1$Sasumua_HSG==2] <- "B"
+df1$HSG_code[df1$Sasumua_HSG==3] <- "C"
+df1$HSG_code[df1$Sasumua_HSG==4] <- "D"
+
+# Convert the HSG code column to a factor
+df1$HSG_code <- factor(df1$HSG_code)
 
 #define hydrologic conditions
-df1$HC <- ifelse(df1$HSG==1, "GOOD",
-                 ifelse(df1$HSG==2, "GOOD",
-                        ifelse(df1$HSG==3, "GOOD",
-                               ifelse(df1$HSG==4, "GOOD",
-                                      NA ))))
+df1$HC[df1$Sasumua_HSG==1] <- "GOOD"
+df1$HC[df1$Sasumua_HSG==2] <- "GOOD"
+df1$HC[df1$Sasumua_HSG==3] <- "GOOD"
+df1$HC[df1$Sasumua_HSG==4] <- "GOOD"
+
+# Convert the HC column to a factor
+df1$HC <- factor(df1$HC)
+
 #set thickness per layer
 L1=0.05
 L2=0.1
@@ -68,19 +75,19 @@ u6=0
 for (i in 1:nrow(df1)){
   
   #create the final file to write all the parameters
-  file<- paste(row.names(df1)[i], "soil.sil", sep="_")
+  file<- paste(df1$Profile[i], "CN_CropResidue.sil", sep="_")
   
   #write headers
   write.table("[soil]\ndetails_URL=\ndescription=",file, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   #extracting curve numbers, slope, slope length
-  CN <- df1$CN[i]
+  CN <- df1$CN_CropResidue[i]
   slp <- df1$Sasumua_Slope[i]
   slpl <- df1$Sasumua_SlopeLength[i]
   hg<-df1$HSG_code[i]
   hc<-df1$HC[i]
   
-    #set number of soil layers
+  #set number of soil layers
   n_layers <- 6
   
   write.table(paste0("hydrologic_group=",hg), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)

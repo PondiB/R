@@ -6,7 +6,7 @@ require(raster)
 require(rgdal)
 
 #set working directory
-setwd("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script/data")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
 layers<-list.files(".", pattern='tif')
 
 slp<-raster("Sasumua_Slope.tif")

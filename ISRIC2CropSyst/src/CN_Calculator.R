@@ -4,7 +4,7 @@
 require(raster) 
 require(rgdal)
 
-setwd("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script/data")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
 layers<-list.files(".", pattern='tif')
 
 
@@ -25,6 +25,6 @@ CN = round((Clay_m2 * CLAY ^ 2 + Clay_m1 * CLAY + Clay_b) + (Silt_m2 * SILT ^ 2 
 
 ###plot(CN)
 
-writeRaster(CN, filename = "CN.tif", format = "GTiff", overwrite = TRUE)
+writeRaster(CN, filename = "Sasumua_CN.tif", format = "GTiff", overwrite = TRUE)
 
 plot(CN)

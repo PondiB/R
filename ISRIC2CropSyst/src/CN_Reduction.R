@@ -4,36 +4,31 @@
 require(raster) 
 require(rgdal)
 
-setwd("D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_Script/data")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
 layers<-list.files(".", pattern='tif')
-CN=raster("CN.tif")
+CN=raster("Sasumua_CN.tif")
 
 # Crop residue; reduction by -2.1
-cr<-CN*0.979
-writeRaster(cr, filename = "D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_runs/cr.tiff", 
-            format = "GTiff", overwrite=TRUE)
+cr<-CN*
+writeRaster(cr, filename = "CN_CropResidue.tiff", format = "GTiff", overwrite=TRUE)
 plot(cr)
 
 # Contours	reduction by -2.5
 C<-CN*0.975
-writeRaster(C, filename = "D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_runs/c.tiff", 
-            format = "GTiff", overwrite=TRUE)
+writeRaster(C, filename = "CN_Contours.tiff", format = "GTiff", overwrite=TRUE)
 plot(c)
 
 # Contours + Crop residues; reduction by -3.5
 c_cr<-CN*0.965
-writeRaster(c_cr, filename = "D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_runs/c_cr.tiff", 
-            format = "GTiff", overwrite=TRUE)
+writeRaster(c_cr, filename = "CN_ContoursCropResidues.tiff", format = "GTiff", overwrite=TRUE)
 plot(c_cr)
 
 # Contours + Terraces	-5.7
 c_t<-CN*0.943
-writeRaster(c_t, filename = "D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_runs/c_t.tiff", 
-            format = "GTiff", overwrite=TRUE)
+writeRaster(c_t, filename = "CN_ContoursTerraces.tiff", format = "GTiff", overwrite=TRUE)
 plot(c_t)
 
 # Contours + Terraces + Crop residues	-7.0
 c_t_cr<-CN*0.93
-writeRaster(c_t_cr, filename = "D:/ToBackup/Projects/Water_Fund/ThikaChania/CropSyst_runs/c_t_cr.tiff", 
-            format = "GTiff", overwrite=TRUE)
+writeRaster(c_t_cr, filename = "CN_ContoursTerracesCropResidues.tiff", format = "GTiff", overwrite=TRUE)
 plot(c_t_cr)
