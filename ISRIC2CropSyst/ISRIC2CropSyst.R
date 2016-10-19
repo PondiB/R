@@ -105,6 +105,7 @@ ccd<-0 #capability_class_dryland
 ai<-"true" #agricultural_irrigated
 ad<- "true" #agricultural_dryland
 bbb<-"false" #bound_by_bedrock
+det<-"Soil_profile_created_from_ISRIC_250m_soil_Properties_of_Africa"
 
 #bypass coeffient
 BC1<-0.5
@@ -112,7 +113,7 @@ BC2<-0.5
 BC3<-0.5
 BC4<-0.5
 BC5<-0.5
-BC6<-0.0
+BC6<-0.5
 
 ###START LOOP###
 for (i in 1:nrow(df1)){
@@ -132,7 +133,7 @@ for (i in 1:nrow(df1)){
   hg<-df1$HSG_code[i]
   hc<-df1$HC[i]
   
-  #set number of soil layers
+    #set number of soil layers
   n_layers <- 6
   
   write.table(paste0("hydrologic_group=",hg), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
