@@ -1,11 +1,16 @@
-#batch Extract Cropsyst Soil Files
+#calculate cropyst soil parameters using ISRIC 250m soils
 #author: John Mutua
 
 #workspace clearance
 rm(list = ls(all = TRUE))
 
-require(raster) 
-require(rgdal)
+#list of packages for session
+.packages = c("rgdal","raster")
+#install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+#load packages into session 
+lapply(.packages, require, character.only=TRUE)
 
 setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_NEW")
 
@@ -41,6 +46,11 @@ df1 <- as.data.frame(extract(rStack, p))
 p@data=data.frame(p@data, df1[match(rownames(p@data),rownames(df1)),])
 df1<-as.data.frame(p)
 
+#recode slope values to percent
+df1$Tana_SlopePerc[df1$Tana_Slope < 0.1] <- "5"
+df1$Tana_SlopePerc[df1$Tana_Slope >0.1 & df1$Tana_Slope <= 0.4] <- "25"
+df1$Tana_SlopePerc[df1$Tana_Slope > 0.4] <- "70"
+
 #recode HSG values to HSG groups
 df1$HSG_code[df1$Tana_HSG==1] <- "A"
 df1$HSG_code[df1$Tana_HSG==2] <- "B"
@@ -72,21 +82,50 @@ u1=15
 u2=15
 u3=15
 u4=15
-u5=0
-u6=0
+u5=15
+u6=15
+
+#extra variables
+albedo_d<-0.155 #albedo dry
+albedo_w<-0.09 #albedo wet
+ocn<-0 #override curve number
+css<-"true" #compute surface storage
+wvca<-1 #soil water vapor conductance adjustment
+ss<-2 #surface storage
+cec<-0 #cation exchange capacity
+ver_ma<-0 #version major
+ver_re<-0 #version release
+ver_mi<-0 #version minor
+fd<-0.02 #finite diff
+SLPF<-1 #SLPF Soil Limitation? P???? Factor
+whc<-0 #water_holding_capacity_to_1m
+awhc<-0 #aggregated_water_holding_capacity_to_1m
+cci<-0 #capability_class_irrigated
+ccd<-0 #capability_class_dryland
+ai<-"true" #agricultural_irrigated
+ad<- "true" #agricultural_dryland
+bbb<-"false" #bound_by_bedrock
+
+#bypass coeffient
+BC1<-0.5
+BC2<-0.5
+BC3<-0.5
+BC4<-0.5
+BC5<-0.5
+BC6<-0.0
 
 ###START LOOP###
 for (i in 1:nrow(df1)){
   
   #create the final file to write all the parameters
-  file<- paste(df1$S_Profile[i], "CN_ContoursTerracesCropResidues.sil", sep="_")
+  file<- paste(df1$S_Profile[i], "CN", df1$Tana_CN[i],".sil", sep="_")
   
   #write headers
   write.table("[soil]\ndetails_URL=\ndescription=",file, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
-  #extracting curve numbers, slope, slope length
-  CN <- df1$CN_ContoursTerracesCropResidues[i]
-  slp <- df1$Tana_Slope[i]
+  #extracting curve numbers, slope, slope length and hydrologic soil group
+  CN <- df1$Tana_CN[i]
+  slp <- df1$Tana_SlopePerc[i]
   slpl <- df1$Tana_SlopeLength[i]
   hg<-df1$HSG_code[i]
   hc<-df1$HC[i]
@@ -96,26 +135,27 @@ for (i in 1:nrow(df1)){
   
   write.table(paste0("hydrologic_group=",hg), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("hydrologic_condition=",hc), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("override_curve_number=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("compute_surface_storage=","true"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("override_curve_number=",ocn), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("compute_surface_storage=",css), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("steepness=",slp), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("slope_length=",slpl), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("albedo_dry=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("albedo_wet=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("water_vapor_conductance_atmosphere_adj=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("surface_storage=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("albedo_dry=",albedo_d), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("albedo_wet=",albedo_w), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("water_vapor_conductance_atmosphere_adj=",wvca), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("surface_storage=",ss), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("cation_exchange_capacity=",cec), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("fallow_curve_number=",CN), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table("[version]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("major=","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("release","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("minor=","0"), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("major=",ver_ma), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("release",ver_re), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("minor=",ver_mi), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table("[profile]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("number_layers=",n_layers), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table("[evaporative_layer_thickness]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("cascade=",L1), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("finite_diff=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("finite_diff=",fd), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table("[CropGro]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("SLPF=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("SLPF=",SLPF), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
 
   #################READING SOIL LAYERS#########################
   #exract CLAY per layer, unit (%)
@@ -202,6 +242,16 @@ for (i in 1:nrow(df1)){
   write.table(paste0("4=",L4), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("5=",L5), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("6=",L6), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  
+  #create a table to write bypass coefficient parameters
+  write.table("[bypass_coef]\nunits=?-",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  # Write coefficient parameters on the table
+  write.table(paste0("1=",BC1), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("2=",BC2), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("3=",BC3), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("4=",BC4), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("5=",BC5), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("6=",BC6), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   #create a table to write Bulk Density parameters
   write.table("[bulk_density]\nunit=g/cm³",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
@@ -374,14 +424,13 @@ for (i in 1:nrow(df1)){
   write.table(paste0("6=",SOM6), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   write.table("[STATSGO]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("water_holding_capacity_to_1m=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("aggregated_water_holding_capacity_to_1m=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("capability_class_irrigated=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("capability_class_dryland=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("agricultural_irrigated=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("agricultural_dryland=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table("bound_by_bedrock=",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  
+  write.table(paste0("water_holding_capacity_to_1m=",whc), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("aggregated_water_holding_capacity_to_1m=",awhc), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("capability_class_irrigated=",cci), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("capability_class_dryland=",ccd), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("agricultural_irrigated=",ai), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("agricultural_dryland=",ad), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("bound_by_bedrock=",bbb), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   # # Calculate BD influenced by SOM as per Minasny & Hartemink, Earth-Science Reviews 106 (2011) 52-62
   # BD_by_SOM1 = 100 / (SOM1 / 0.224 + (100 - SOM1) / BLD1)

@@ -18,8 +18,3 @@ plot(slp)
 
 #write slope raster
 writeRaster(slp, filename = "Tana_Slope.tif", format = "GTiff", overwrite = TRUE)
-
-# #write slope in percent
-# slp_per<-slp*100
-# writeRaster(slp_per, filename = "Sasumua_Slope_Perc.tif", format = "GTiff", overwrite = TRUE)
-# plot(slp_per)
