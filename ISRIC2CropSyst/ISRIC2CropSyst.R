@@ -121,7 +121,9 @@ for (i in 1:nrow(df1)){
   file<- paste(df1$S_Profile[i], "CN", df1$Tana_CN[i],".sil", sep="_")
   
   #write headers
-  write.table("[soil]\ndetails_URL=\ndescription=",file, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table("[soil]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("details_URL=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("description=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   #extracting curve numbers, slope, slope length and hydrologic soil group
   CN <- df1$Tana_CN[i]
