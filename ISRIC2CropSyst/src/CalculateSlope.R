@@ -6,10 +6,10 @@ require(raster)
 require(rgdal)
 
 #set working directory
-setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_NEW")
 layers<-list.files(".", pattern='tif')
 
-dem<-raster("Sasumua_DEM90m.tif")
+dem<-raster("DEM.tif")
 plot(dem)
 
 #calculate slope
@@ -17,7 +17,7 @@ slp <- terrain(dem, "slope")
 plot(slp)
 
 #write slope raster
-writeRaster(slp, filename = "Sasumua_Slope.tif", format = "GTiff", overwrite = TRUE)
+writeRaster(slp, filename = "Tana_Slope.tif", format = "GTiff", overwrite = TRUE)
 
 # #write slope in percent
 # slp_per<-slp*100

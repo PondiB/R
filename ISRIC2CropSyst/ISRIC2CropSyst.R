@@ -7,13 +7,16 @@ rm(list = ls(all = TRUE))
 require(raster) 
 require(rgdal)
 
-setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered")
+setwd("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_NEW")
 
 #source dir
 src.dir <- "D:/ToBackup/Scripts/R/ISRIC2CropSyst/src"
 
 #calculate Curve Number
 source(paste(src.dir,"/CN_Calculator.R",sep="")) #loading the script
+
+#calculate reduction in curve number
+source(paste(src.dir,"/CN_Reduction.R",sep="")) #loading the script
 
 #calculate Hydrologic Soil groups
 source(paste(src.dir,"/CN2HSG_Calculator.R",sep="")) #loading the script
@@ -28,8 +31,9 @@ source(paste(src.dir,"/CalculateSlopeLength.R",sep="")) #loading the script
 rasList <- list.files(".", pattern = ".tif$", full.names = TRUE)
 rStack<-stack(rasList)
 
+
 #load and read the point shapefile
-p <- shapefile("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_Sasumua_Clustered/shapes/sasumua_soil_sites.shp")
+p <- shapefile("D:/ToBackup/Projects/SWAT/ArcSWAT_Projects/Sasumua_data/ISRIC2Cropsyst_NEW/shapes/250m_SoilZones_Sites.shp")
 p <- spTransform(p, crs(rStack))
 
 #assign raster values to p and create a dataframe out of it
@@ -38,19 +42,19 @@ p@data=data.frame(p@data, df1[match(rownames(p@data),rownames(df1)),])
 df1<-as.data.frame(p)
 
 #recode HSG values to HSG groups
-df1$HSG_code[df1$Sasumua_HSG==1] <- "A"
-df1$HSG_code[df1$Sasumua_HSG==2] <- "B"
-df1$HSG_code[df1$Sasumua_HSG==3] <- "C"
-df1$HSG_code[df1$Sasumua_HSG==4] <- "D"
+df1$HSG_code[df1$Tana_HSG==1] <- "A"
+df1$HSG_code[df1$Tana_HSG==2] <- "B"
+df1$HSG_code[df1$Tana_HSG==3] <- "C"
+df1$HSG_code[df1$Tana_HSG==4] <- "D"
 
 # Convert the HSG code column to a factor
 df1$HSG_code <- factor(df1$HSG_code)
 
 #define hydrologic conditions
-df1$HC[df1$Sasumua_HSG==1] <- "GOOD"
-df1$HC[df1$Sasumua_HSG==2] <- "GOOD"
-df1$HC[df1$Sasumua_HSG==3] <- "GOOD"
-df1$HC[df1$Sasumua_HSG==4] <- "GOOD"
+df1$HC[df1$Tana_HSG==1] <- "GOOD"
+df1$HC[df1$Tana_HSG==2] <- "GOOD"
+df1$HC[df1$Tana_HSG==3] <- "GOOD"
+df1$HC[df1$Tana_HSG==4] <- "GOOD"
 
 # Convert the HC column to a factor
 df1$HC <- factor(df1$HC)
@@ -75,15 +79,15 @@ u6=0
 for (i in 1:nrow(df1)){
   
   #create the final file to write all the parameters
-  file<- paste(df1$Profile[i], "CN_CropResidue.sil", sep="_")
+  file<- paste(df1$S_Profile[i], "CN_ContoursTerracesCropResidues.sil", sep="_")
   
   #write headers
   write.table("[soil]\ndetails_URL=\ndescription=",file, row.names=FALSE, quote=FALSE, col.names=FALSE)
   
   #extracting curve numbers, slope, slope length
-  CN <- df1$CN_CropResidue[i]
-  slp <- df1$Sasumua_Slope[i]
-  slpl <- df1$Sasumua_SlopeLength[i]
+  CN <- df1$CN_ContoursTerracesCropResidues[i]
+  slp <- df1$Tana_Slope[i]
+  slpl <- df1$Tana_SlopeLength[i]
   hg<-df1$HSG_code[i]
   hc<-df1$HC[i]
   
