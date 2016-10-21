@@ -177,14 +177,6 @@ for (i in 1:nrow(df1)){
   SAND5 <- df1$af_SNDPPT_T__M_sd5_250m[i]
   SAND6 <- df1$af_SNDPPT_T__M_sd6_250m[i]
   
-  # #extract Bulk density in kg / m3; Divide ISRIC BLD by 1000
-  # BLD1 <- df1$af_BLD_T__M_sd1_250m[i] / 1000
-  # BLD2 <- df1$af_BLD_T__M_sd2_250m[i] / 1000
-  # BLD3 <- df1$af_BLD_T__M_sd3_250m[i] / 1000
-  # BLD4 <- df1$af_BLD_T__M_sd4_250m[i] / 1000
-  # BLD5 <- df1$af_BLD_T__M_sd5_250m[i] / 1000
-  # BLD6 <- df1$af_BLD_T__M_sd6_250m[i] / 1000
-  
   #bulk density (BD) as per Minasny & Hartemink, Earth-Science Reviews 106 (2011) 52-62
   BLD1= 0.935 + 0.049 * log(L1) + 0.0055 * SAND1 + 0.000065 * (SAND1 - 38.96) ^ 2
   BLD2= 0.935 + 0.049 * log(L2) + 0.0055 * SAND2 + 0.000065 * (SAND2 - 38.96) ^ 2
@@ -434,13 +426,5 @@ for (i in 1:nrow(df1)){
   write.table(paste0("agricultural_irrigated=",ai), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("agricultural_dryland=",ad), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("bound_by_bedrock=",bbb), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  
-  # # Calculate BD influenced by SOM as per Minasny & Hartemink, Earth-Science Reviews 106 (2011) 52-62
-  # BD_by_SOM1 = 100 / (SOM1 / 0.224 + (100 - SOM1) / BLD1)
-  # BD_by_SOM2 = 100 / (SOM2 / 0.224 + (100 - SOM2) / BLD2)
-  # BD_by_SOM3 = 100 / (SOM3 / 0.224 + (100 - SOM3) / BLD3)
-  # BD_by_SOM4 = 100 / (SOM4 / 0.224 + (100 - SOM4) / BLD4)
-  # BD_by_SOM5 = 100 / (SOM5 / 0.224 + (100 - SOM5) / BLD5)
-  # BD_by_SOM6 = 100 / (SOM6 / 0.224 + (100 - SOM6) / BLD6)
   
 } #end of the loop
