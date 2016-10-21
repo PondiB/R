@@ -115,6 +115,9 @@ BC4<-0.5
 BC5<-0.5
 BC6<-0.5
 
+# Write dataframe as CSV
+write.csv(df1, file = "ISRIC_2_CropSyt.csv")
+
 ###START LOOP###
 for (i in 1:nrow(df1)){
   
