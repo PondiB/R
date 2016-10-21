@@ -105,7 +105,7 @@ ccd<-0 #capability_class_dryland
 ai<-"true" #agricultural_irrigated
 ad<- "true" #agricultural_dryland
 bbb<-"false" #bound_by_bedrock
-det<-"Soil_profile_created_from_ISRIC_250m_soil_Properties_of_Africa"
+det="Soil data sourced from ISRIC. Curve number and Hydrologic soil groups altered "
 
 #bypass coeffient
 BC1<-0.5
@@ -123,9 +123,7 @@ for (i in 1:nrow(df1)){
   
   #write headers
   write.table("[soil]",file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("details_URL=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  write.table(paste0("description=",""), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
-  
+    
   #extracting curve numbers, slope, slope length and hydrologic soil group
   CN <- df1$Tana_CN[i]
   slp <- df1$Tana_SlopePerc[i]
@@ -133,9 +131,11 @@ for (i in 1:nrow(df1)){
   hg<-df1$HSG_code[i]
   hc<-df1$HC[i]
   
-    #set number of soil layers
+  #set number of soil layers
   n_layers <- 6
   
+  write.table(paste0("details_URL=",det), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
+  write.table(paste0("description=", df1$S_Profile[i], "_CN", df1$Tana_CN[i]), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("hydrologic_group=",hg), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("hydrologic_condition=",hc), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
   write.table(paste0("override_curve_number=",ocn), file, append = TRUE, row.names=FALSE, quote=FALSE, col.names=FALSE)
