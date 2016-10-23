@@ -8,7 +8,7 @@ output:
   pdf_document:
     fig_caption: true
     fig_height: 4.5
-    fig_width: 6
+    fig_width: 6.5
 ---
 
 ### Objectives
@@ -21,7 +21,7 @@ This manual will help you conduct a land use land cover classification of a
 4.  Speed up image classification through parallel processing (Bonus)
 
 You can download raw satellite images from this 
-[link](http://earthexplorer.usgs.gov/). Otherwise,
+[site](http://earthexplorer.usgs.gov/). Otherwise,
 download the sample dataset we will use in this session from this 
 link <https://drive.google.com/open?id=0B_Gkb_0tNKkQbktFWUFBLU9CV2c>
 
@@ -68,10 +68,20 @@ set.seed(322)
 
 Now let’s import the Landsat image into R as a 'RasterBrick' object using the 
 brick function from the 'raster' package. Also let’s replace the original band 
-names with shorter ones (‘B1’ to ‘B7’).
+names with shorter ones ('B1' to 'B7').
 ```{r}
 img <- brick("TOA/Otji_TOA.tif")
-names(img) <- c(paste0("B", 2:7, coll = "")) 
+names(img) <- c(paste0("B", 2:7, coll = ""))
+img
+```
+
+Calculate NDVI and save the output for use in the next session. The resulting 
+NDVI can be plotted as a map, values range from 0.2 (bare soils) to 0.6 (dense 
+vegetation) in the area.
+```{r}
+NDVI <- (img[[4]] - img[[3]]) / (img[[4]] + img[[3]])
+writeRaster(NDVI, "Otji_NDVI.tif", overwrite=TRUE)
+plot(NDVI, main="NDVI map - Otjiwarongo")
 ```
 
 We can make a natural colour visualization of the Landsat image in R using the 
@@ -83,9 +93,8 @@ plotRGB(img * (img >= 0), r = 4, g = 3, b = 2, scale = 10000)
 ```
 
 I had initially created a set of training areas in a polygon shapefile 
-('Otji_trainingData.shp') 
-which stores the id for each land cover type in a column in the attribute table 
-called ‘LC_Code’ as shown below:
+('Otji_trainingData.shp') which stores the id for each land cover type in a 
+column in the attribute table called ‘LC_Code’ as shown below:
 
 ![Training data as seen in ESRI ArcGIS](C:/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover/figures/training_data_screenshot.png)
 
@@ -131,16 +140,16 @@ for (i in 1:length(unique(trainData[[responseCol]]))){
 }
 ```
 
-Let's partition the data into training and testing, this will enable us conduct 
-accuracy tests
+We can now partition the data into training and testing, this will enable us 
+conduct accuracy tests.
 ```{r}
 inData <- createDataPartition(y = trainSet$class, p = 0.7, list = FALSE)
 training <- trainSet[inData,]
 testing <- trainSet[-inData,]
 ```
 
-As you can see below, the training and testsing data.frames contains values for 
-each of six Landsat TOA bands plus the class attribute
+As you can see below, the training and testsing 'data.frames' contains values 
+for each of six 'Landsat' TOA bands plus the class attribute.
 ```{r}
 table(training$class)
 table(testing$class)
@@ -155,8 +164,8 @@ table(train_sample$class)
 
 ###Fitting the Random Forests model
 
-Next let's define and fit the RandomForests model using the 'train' function 
-from the 'caret' packag by specifying the model as a formula with the dependent
+Next let's define and fit the .RandomForests. model using the 'train' function 
+from the 'caret' package by specifying the model as a formula with the dependent
 variable (i.e., the land cover types ids) encoded as factors.
 ```{r}
 rf_Otji <- train(as.factor(class) ~ B3 + B4 + B5, method = "rf", data =  
@@ -199,7 +208,7 @@ legend("bottomright",
                 "Bare land"), fill=cols, bg="white")
 ```
 
-As a bonus you can check the amount of time you spent conducting this analysis
+Finally check the amount of time you spent conducting this analysis.
 ```{r}
 timeDiff <- Sys.time() - startTime
 cat("\nProcessing time", format(timeDiff), "\n")
