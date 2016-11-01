@@ -18,7 +18,7 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 
 #set working directory
-setwd("D:/Users/DemoA/WorkDocs/Bush_Density_Mapping")
+setwd("C:/Bush_Density_Mapping")
 
 #read in data from excel sheet
 BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
@@ -52,8 +52,8 @@ write.csv(BushData_clean, file = "Otjo_BushData.csv",row.names=FALSE)
 #convert the dataraframe into a spatial point dataframe
 xy <- BushData_clean[,c(3,2)]
 trainDatageo <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
-                                       proj4string = CRS("+proj=longlat 
-                                                         +datum=WGS84"))
+                                    proj4string = CRS("+proj=longlat 
+                                                      +datum=WGS84"))
 trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south 
                                            +datum=WGS84'))
 
@@ -92,6 +92,7 @@ covs <- mask(rstack, Otjo_BushArea)
 v<-as.data.frame(extract(covs,trainData))
 trainData@data=data.frame(trainData@data, v[match(rownames(trainData@data),
                                                   rownames(v)),])
+
 #rename fields in training dataset
 #remove NAs
 names(trainData) <- c("waypoint_no","latitude","longitude","shrubs_less1.5", "shrubs_more1.5_no_stem",
@@ -101,33 +102,25 @@ trainData@data<-trainData@data[complete.cases(trainData@data),]
 write.csv(trainData@data, file = "Otjo_RF_trainData.csv",row.names=FALSE)
 
 #let's plot  some of the variables
-scatterplot(band5 ~ shrubs_less1.5|crown_cover, data=trainData@data, 
+scatterplot(NDVI ~ shrubs_less1.5|crown_cover, data=trainData@data, 
             xlab="Count of Shrubs less than 1.5m",ylab="NDVI", main="NDVI versus Count of Shrubs (less than 1.5m)")
-scatterplot(band5 ~ shrubs_more1.5, data=trainData@data, 
+scatterplot(NDVI ~ shrubs_more1.5, data=trainData@data, 
             xlab="Count of Shrubs more than 1.5m",ylab="NDVI", main="NDVI versus Count of shrubs more than 1.5m")
-scatterplot(band5 ~ shrubs_all, data=trainData@data, 
+scatterplot(NDVI ~ shrubs_all, data=trainData@data, 
             xlab="Count of shrub (all)",ylab="NDVI", main="NDVI versus Count of shrubs")
 
 #############################################
 #build the three models by fitting the model using the 'train' function from the 'caret' package.
 #use Bootstrap resampling method to estimate model accuracy.
-# tcontrol1 <- trainControl(method="boot", number=100)
-# model1 <- train(shrubs_less1.5~NDVI+crown_cover,method='rf', trControl = tcontrol1, data=trainData@data)
-# 
-# tcontrol2 <- trainControl(method="boot", number=100)
-# model2 <- train(shrubs_more1.5~NDVI+crown_cover,method='rf', trControl = tcontrol2, data=trainData@data)
-# 
-# tcontrol3 <- trainControl(method="boot", number=100)
-# model3 <- train(shrubs_all~NDVI+crown_cover,method='rf', trControl = tcontrol3, data=trainData@data)
-
 tcontrol1 <- trainControl(method="boot", number=100)
-model1 <- train(shrubs_less1.5~NDVI+crown_cover,method='rf', trControl = tcontrol1, data=trainData@data)
-
+model1 <- train(shrubs_less1.5~crown_cover+NDVI,method='rf', trControl = tcontrol1, data=trainData@data)
+				
 tcontrol2 <- trainControl(method="boot", number=100)
-model2 <- train(shrubs_more1.5~NDVI+crown_cover,method='rf', trControl = tcontrol2, data=trainData@data)
-
+model2 <- train(shrubs_more1.5~crown_cover+NDVI,method='rf', trControl = tcontrol2, data=trainData@data)
+				
 tcontrol3 <- trainControl(method="boot", number=100)
-model3 <- train(shrubs_all~NDVI+crown_cover,method='rf', trControl = tcontrol3, data=trainData@data)
+model3 <- train(shrubs_all~crown_cover+NDVI,method='rf', trControl = tcontrol3, data=trainData@data)
+
 
 #print the 3 models
 print(model1)
@@ -141,11 +134,6 @@ prediction2 <- clusterR(covs, raster::predict, args = list(model = model2))
 prediction3 <- clusterR(covs, raster::predict, args = list(model = model3))
 endCluster()
 
-#round raster values
-prediction1<-round(prediction1, digits = 0)
-prediction2<-round(prediction2, digits = 0)
-prediction3<-round(prediction3, digits = 0)
-
 #save the predicted images as GeoTIFFs
 writeRaster(prediction1, "otjo_bd1.tif", overwrite=TRUE)
 writeRaster(prediction2, "otjo_bd2.tif", overwrite=TRUE)
@@ -155,5 +143,3 @@ writeRaster(prediction3, "otjo_bd3.tif", overwrite=TRUE)
 plot(prediction1, main="Density for shrubs less than 1.5m", axes=FALSE)
 plot(prediction2, main="Density for shrubs more than 1.5m", axes=FALSE)
 plot(prediction3, main="Density for all shrubs", axes=FALSE)
-
-

@@ -4,8 +4,8 @@ author: CIAT
 date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
 output:
   pdf_document:
-    fig_width: 6
-    fig_height: 4.5
+    fig_width: 7
+    fig_height: 5
     fig_caption: true
 fontsize: 11pt
 ---
@@ -38,36 +38,37 @@ library("knitr")
 opts_knit$set(root.dir = "C:/LDN_Workshop/Sample_dataset/NDVI_data")
 ```
 
+```{r setup, include=FALSE, cache=FALSE}
+muffleError <- function(x,options) {}
+knit_hooks$set(error=muffleError)
+```
+
 ### Preliminaries
 
 You need to first install all the required packages. Type (within R) install 
 packages("name of package") (This needs to be done just once.). You then load 
-the packages using the 'library' function:
+the packages using the 'library' function.
 
+The code below lists down the packages to be used in this session and installs 
+if not already installed then loads into the session.
 ```{r}
-library(raster) #working with rasters
-library(rgdal) #working with geospatial data
-library(ggplot2) #creating graphs
-library(dplyr) #subsetting by season
-library(lubridate) #working with dates
-library(grid) #arranging plots
-library(gridExtra) #arranging plots
+.packages = c("rgdal","raster","ggplot2","dplyr","lubridate","grid","gridExtra")
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+lapply(.packages, require, character.only=TRUE)
+```
+
+To get help on the functions and data sets in R, use `help()` or `?`. 
+For example, to view the help file for the `calc` function, type one of the 
+following:
+```{r help, eval=FALSE}
+help(calc)
+?calc
 ```
 
 Set your working directory as follows:
 ```{r}
 setwd("C:/LDN_Workshop/Sample_dataset/NDVI_data")
-```
-
-This needs to be done every time you start R. (There is a way to have the 
-package loaded automatically every time, but we won't discuss that here).
-To get help on the functions and data sets in R, use `help()` or `?`. 
-For example, to view the help file for the `calc` function, type one of the 
-following:
-
-```{r help, eval=FALSE}
-help(calc)
-?calc
 ```
 
 Import all NDVI raster datasets in your working directory and create a raster 
@@ -93,22 +94,23 @@ Calculate mean NDVI for each raster and convert output array to a data frame
 avg_NDVI_Otji <- as.data.frame(cellStats(NDVI_Otji_stack,mean))
 ```
 
-Rename the NDVI column
+Rename the NDVI column to 'meanNDVI'.
 ```{r}
 names(avg_NDVI_Otji) <- "meanNDVI"
 ```
 
-Add julianDay values as a column in the data frame
+Add [Julian day](https://en.wikipedia.org/wiki/Julian_day) 
+values as a column in the data frame.
 ```{r}
 avg_NDVI_Otji$julianDay <- julianDay
 ```
 
-Check out the class in the new column
+Let's check out what 'class' in the new column
 ```{r}
 class(avg_NDVI_Otji$julianDay)
 ```
 
-Create a time vector and convert it to a date
+Now we can create a time vector and convert it to a date
 ```{r}
 tVector<-paste(year,julianDay,sep="-")
 timeNDVI<-as.Date(tVector,format = "%Y-%j")
@@ -119,7 +121,7 @@ Add date values as a column in the data frame
 avg_NDVI_Otji$date <- timeNDVI
 ```
 
-Check out classes of the two columns now
+Let's check out 'class' of the two columns now
 ```{r}
 class(avg_NDVI_Otji$date)
 class(avg_NDVI_Otji$julianDay)
@@ -134,7 +136,6 @@ avg_NDVI_Otji$year <- year
 ### Plot time series
 
 Plot NDVI by year although this doesn't make sense
-
 ```{r}
 ggplot(avg_NDVI_Otji, aes(year, meanNDVI), na.rm=TRUE) +
   geom_point(size=2,colour = "PeachPuff4") + 

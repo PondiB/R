@@ -6,8 +6,8 @@ fontsize: 11pt
 geometry: margin=1in
 output:
   pdf_document:
-    fig_width: 6
-    fig_height: 4
+    fig_width: 7
+    fig_height: 5
     fig_caption: true
 ---
 
@@ -15,48 +15,57 @@ output:
 This manual will help you calculate bush density using count data with ndvi and 
 crown cover data as covariates. At the end of this session, you will be able to:
 
-1.  Import excel data into R
-2.  Import raster data into R
-3.  Convert data from excel to ESRI point shapefile
-4.  Use the point and raster data to construct a random forest model (RF) 
-5.  Use the RF model to predict bush density in areas we don't have count data
-6.  Test how accurate the model is
+1.  Import excel data into R.
+2.  Import raster data into R.
+3.  Convert data from excel to ESRI point shapefile.
+4.  Use the point and raster data to construct a random forest model.
+5.  Use the RF model to predict bush density.
+6.  Test model accuracy.
 
 Download the sample dataset we will use in this session from this link 
 <https://drive.google.com/open?id=0B_Gkb_0tNKkQcGZGc1ZWRnpZc0U>
 
-You can now start the session but first clear your work space:
+Before you start this session, it is important you have (i) the latest 
+[R software](https://cran.r-project.org/bin/windows/base/) and (ii) 
+[Rstudio](https://www.rstudio.com/) installed in your computer.
+
+Start the session but first clear your work space.
 ```{r}
 rm(list = ls(all = TRUE))
 ```
 
-To enable us reproduce the results next time, let's set the seed
+
+```{r echo=FALSE}
+library("knitr")
+opts_knit$set(root.dir= "C:/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
+```
+
+```{r setup, include=FALSE, cache=FALSE}
+muffleError <- function(x,options) {}
+knit_hooks$set(error=muffleError)
+```
+
+To enable us reproduce the results next time, let's set the seed.
 ```{r}
 set.seed(500)
 ```
 
-Let's set the start of data processing
+Set the start of data processing.
 ```{r}
 startTime <- Sys.time()
 cat("Start time", format(startTime),"\n")
 ```
 
-Set up some options (you do not have to do this)
-```{r echo=FALSE}
-library("knitr")
-opts_knit$set(root.dir="C:/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
-```
-
-Set working directory
+Set working directory.
 ```{r}
 setwd("C:/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
 ```
 
-Let's list down the packages to be used in this session. Packages will be 
-installed if not already installed. They will then be loaded into the session
+List down the packages to be used in this session. Packages will be 
+installed if not already installed. They will then be loaded into the session.
 ```{r}
 .packages = c("sp","rgdal","raster","randomForest","plyr","xlsx","xlsxjars",
-              "dplyr","caret","car")
+              "dplyr","caret","car", "e1071","snow")
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
@@ -69,6 +78,8 @@ following:
 help(calc)
 ?calc
 ```
+
+###Reading your data
 
 Read in data from excel sheet
 ```{r}
@@ -84,7 +95,7 @@ BushData$shrubs_more_1.5_no_stem <- apply(BushData[,16:19], 1, sum, na.rm=TRUE)
 BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, sum, na.rm=TRUE)
 ```
 
-Create new data frame with the columns you need
+Create new 'data.frame' with the columns you need
 ```{r}
 BushData_clean<-BushData[,c("Waypoint_No","Latitude","Longitude",
                             "shrubs_less_1.5","shrubs_more_1.5_no_stem",
@@ -98,14 +109,14 @@ BushData_clean$shrubs_more_1.5 <- apply(BushData_clean[,5:6], 1, sum,
 BushData_clean$shrubs_all <- apply(BushData_clean[,4:6], 1, sum, na.rm=TRUE)
 ```
 
-Round columns
+Round columns.
 ```{r}
 BushData_clean<-BushData_clean %>% 
   mutate_each(funs(round(.,0)), shrubs_less_1.5, shrubs_more_1.5_no_stem, 
               shrubs_more_1.5_stem, shrubs_more_1.5, shrubs_all)
 ```
 
-Remove all NAs
+Remove all NAs.
 ```{r}
 BushData_clean<-BushData_clean[complete.cases(BushData_clean),]
 ```
@@ -116,7 +127,7 @@ write.csv(BushData_clean, file = "Otji_BushData_trainData.csv",row.names=FALSE)
 ```
 
 Get long and lat from your data.frame. Make sure that the order is in lon/lat.
-Convert the dataraframe into a spatial point dataframe
+Convert the dataraframe into a spatial point dataframe.
 ```{r}
 xy <- BushData_clean[,c(3,2)]
 trainDatageo <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
@@ -126,12 +137,9 @@ trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south
                                            +datum=WGS84'))
 ```
 
-Let's do some background checking of the field names
+Let's do some background checking of the field names and rename trainData fields
 ```{r}
 names(trainData)
-```
-rename trainData fields
-```{r}
 names(trainData) <- c("Waypoint_No","Latitude","Longitude","shrubs_less_1.5",
                       "shrubs_more_1.5_no_stem", "shrubs_more_1.5_stem", 
                       "shrubs_more_1.5", "shrubs_all")
@@ -155,42 +163,31 @@ Import the bush area mask
 Otjo_BushArea <- raster("Raster_data/Other_data/Otji_BushArea_2016.tif")
 ```
 
-Let's check various stuff
-```{r}
-crs(rstack)
-crs(Otjo_BushArea)
-crs(trainData)
-extent(rstack)
-extent(Otjo_BushArea)
-extent(trainData)
-```
-
 Set extent of the training data to match covs
 ```{r}
 trainData@bbox <- bbox(Otjo_BushArea)
 ```
 
-Let's plot the points ontop of `layer 3` of the raster stack
+Plot the points on top of `layer 3` of the raster stack
 ```{r}
 plot(rstack[[3]])
 plot(trainData, add=TRUE, col = "red", pch = 3)
 ```
 
-Mask, read and stack the covariates
+Mask, read and stack the covariates.
 ```{r}
 covs <- mask(rstack, Otjo_BushArea)
-# writeRaster(covs, filename = "Otji_Stack_2016.tif", format = "GTiff", 
-# overwrite = TRUE)
 ```
 
-Assign raster values to the training data
+Assign raster values to the training data.
 ```{r}
 v<-as.data.frame(extract(covs,trainData))
 trainData@data=data.frame(trainData@data, v[match(rownames(trainData@data),
                                                   rownames(v)),])
 ```
 
-Rename fields in training dataset, remove NAs and write the dataset as a .csv
+Rename fields in the training dataset, remove NAs and write the dataset as a 
+.csv
 ```{r}
 names(trainData) <- c("waypoint_no","latitude","longitude","shrubs_less1.5",
                       "shrubs_more1.5_no_stem","shrubs_more1.5_stem",
@@ -200,110 +197,91 @@ trainData@data<-trainData@data[complete.cases(trainData@data),]
 write.csv(trainData@data, file = "Otji_MF_trainData.csv",row.names=FALSE)
 ````
 
-Randomly select index numbers and use that for splitting the data
-Set 75% as training nad 25% as test data
+Let's generate a plot of NDVI versus shrubs and add the R squared value on 
+the plot.
 ```{r}
-trainIndex=sample(1:nrow(trainData@data),size=0.75*nrow(trainData@data))
-trainingSet=trainData@data[trainIndex,]
-testingSet=trainData@data[-trainIndex,]
+with(trainData@data, plot(shrubs_less1.5,NDVI, 
+                          xlab="Shrubs <1.5m", ylab="NDVI", 
+                          main="Plot of NDVI versus Shrubs"))
+abline(fit <- lm(NDVI~shrubs_less1.5, data = trainData@data), col='red')
+legend("topright", bty="n", legend=paste("R2 =", 
+                                         format(summary(fit)$r.squared, 
+                                                digits=4)))
 ```
 
-Let's plot  some of the variables
+###Fitting the Random Forest regression models
+
+You can now fit the models using the 'train' function from the 'caret' package. 
+i.e. Specify the model as a formula with the dependent variable 
+(i.e., count of shrubs).
+
+Use [Bootstrap resampling](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) 
+method to estimate model accuracy. This method involves taking random samples 
+from the dataset (with re-selection) against which to evaluate the model. In 
+aggregate, the results provide an indication of the variance of the models 
+performance.
 ```{r}
-scatterplot(NDVI ~ shrubs_less1.5|crown_cover, data=trainingSet, 
-            xlab="Count of Shrubs less than 1.5m",ylab="NDVI", 
-            main="NDVI versus Count of Shrubs (less than 1.5m)")
-scatterplot(NDVI ~ shrubs_more1.5, data=trainingSet, 
-            xlab="Count of shrub (more than 1.5m)",ylab="NDVI", 
-            main="NDVI versus Count of shrub (more than 1.5m)")
-scatterplot(shrubs_more1.5 ~ crown_cover, data=trainingSet, 
-            xlab="Crown cover",ylab="shrubs_more1.5", 
-            main="shrubs_more1.5 versus Crown cover")
-scatterplot(shrubs_less1.5 ~ crown_cover, data=trainingSet, 
-            xlab="Crown cover",ylab="shrubs_less1.5", 
-            main="shrubs_less1.5 versus Crown cover")
+tcontrol1 <- trainControl(method="boot", number=100)
+model1 <- train(shrubs_less1.5~crown_cover+NDVI,method='rf', 
+                trControl = tcontrol1, data=trainData@data)
 ```
 
-You can now set up the model using randomly sampled data
 ```{r}
-accuracies1<-c()
-accuracies2<-c()
-accuracies3<-c()
-```
-Construct the rf model for shrubs less than 1.5m
-```{r}
-model1 <- randomForest(x=trainingSet[,c(9:10)],
-                       y=trainingSet[,"shrubs_less1.5"], 
-                       ntree=2000, proximity=TRUE, importance=TRUE)
+tcontrol3 <- trainControl(method="boot", number=100)
+model3 <- train(shrubs_all~crown_cover+NDVI,method='rf',
+                trControl = tcontrol3, data=trainData@data)
 ```
 
-Predict density for shrubs less than 1.5m
-```{r}
-otji_bd1<-predict(covs, model1, filename="otji_bd1", format='GTiff', 
-                  type="response", index=1, na.rm=TRUE, progress="window", 
-                  overwrite=TRUE)
-plot(otji_bd1, main="Density for shrubs less than 1.5m", axes=FALSE)
-prediction1 <- predict(model1, testingSet)
-testingSet$rightPred1 <- prediction1 == testingSet$shrubs_less1.5
-t1<-table(prediction1, testingSet$shrubs_less1.5)
-print(t1)
-accuracy1 <- sum(testingSet$rightPred1)/nrow(testingSet)
-accuracies1 <- c(accuracies1,accuracy1)
-print(accuracy1)
-```
-
-Construct the rf model for shrubs more than 1.5m
-```{r}
-model2 <- randomForest(x=trainingSet[,c(9:10)],
-                       y=trainingSet[,"shrubs_more1.5"], 
-                       ntree=2000, proximity=TRUE, importance=TRUE)
-```
-
-Predict density for shrubs more than 1.5m
-```{r}
-otji_bd2<-predict(covs, model2, filename="otji_bd2", format='GTiff', 
-                  type="response", index=1, na.rm=TRUE, progress="window", 
-                  overwrite=TRUE)
-plot(otji_bd2, main="Density for shrubs more than 1.5m", axes=FALSE)
-prediction2 <- predict(model2, testingSet)
-testingSet$rightPred2 <- prediction2 == testingSet$shrubs_more1.5
-t2<-table(prediction2, testingSet$shrubs_more1.5)
-print(t2)
-accuracy2 <- sum(testingSet$rightPred2)/nrow(testingSet)
-accuracies2 <- c(accuracies2,accuracy2)
-print(accuracy2)
-```
-
-Construct the rf model for for all shrubs
-```{r}
-model3 <- randomForest(x=trainingSet[,c(9:10)],
-                       y=trainingSet[,"shrubs_all"], 
-                       ntree=2000, proximity=TRUE, importance=TRUE)
-```
-
-Predict density for all shrubs
-```{r}
-otji_bd3<-predict(covs, model3, filename="otji_bd3", format='GTiff', 
-                  type="response", index=1, na.rm=TRUE, progress="window", 
-                  overwrite=TRUE)
-plot(otji_bd3, main="Density for all shrubs", axes=FALSE)
-prediction3 <- predict(model3, testingSet)
-testingSet$rightPred3 <- prediction3 == testingSet$shrubs_all
-t3<-table(prediction3, testingSet$shrubs_all)
-print(t3)
-accuracy3 <- sum(testingSet$rightPred3)/nrow(testingSet)
-accuracies3 <- c(accuracies3,accuracy3)
-print(accuracy3)
-```
-
-print all the models
+Next, before you predict the models, you can print out the 
+[RMSE](https://en.wikipedia.org/wiki/Root-mean-square_deviation) and 
+[Rsquared](https://en.wikipedia.org/wiki/Coefficient_of_determination) 
+. R squared is a number that indicates the proportion of the 
+variance in the dependent variable that is predictable from the independent 
+variable.
 ```{r}
 print(model1)
-print(model2)
 print(model3)
 ```
 
-As a bonus you can check the amount of time you spent conducting this analysis
+Use the 'predict' command to make rasters with predictions from the fitted 
+models. To speed up computations use the 'clusterR' function from the 'raster' 
+package which supports multi-core computing for functions such as predict 
+(NB: install 'snow' package).
+```{r}
+beginCluster()
+prediction1 <- clusterR(covs, raster::predict, args = list(model = model1))
+prediction3 <- clusterR(covs, raster::predict, args = list(model = model3))
+endCluster()
+```
+
+Compute the density for shrubs above 1.5m. We can do this by substracting 
+shrubs less than 1.5m from all shrubs.
+```{r}
+prediction2 <- prediction3 - prediction1
+```
+
+Multiply the output rasters by 25 to convert the units from shrubs/0.04ha to 
+shrubs/1ha, round raster values to whole numbers and save the predicted 
+images as GeoTIFFs.
+```{r}
+prediction1<-round(prediction1*25, digits = 0)
+prediction2<-round(prediction2*25, digits = 0)
+prediction3<-round(prediction3*25, digits = 0)
+writeRaster(prediction1, "otji_bd1.tif", overwrite=TRUE)
+writeRaster(prediction2, "otji_bd2.tif", overwrite=TRUE)
+writeRaster(prediction3, "otji_bd3.tif", overwrite=TRUE)
+```
+
+### Results
+
+Plot the three maps.
+```{r}
+plot(prediction1, main="Density for shrubs <1.5m", axes=FALSE)
+plot(prediction2, main="Density for shrubs >1.5m", axes=FALSE)
+plot(prediction3, main="Density for shrubs", axes=FALSE)
+```
+
+Finally, check the amount of time you spent conducting this analysis
 ```{r}
 timeDiff <- Sys.time() - startTime
 cat("\nProcessing time", format(timeDiff), "\n")

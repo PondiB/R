@@ -60,7 +60,7 @@ rasList <- list.files("Raster_data/", pattern = ".tif$", full.names = TRUE)
 # writeRaster(NDVI, filename="Otjozondjupa_NDVI", format="GTiff", overwrite=TRUE)
 
 # create a raster stack
-rStack <- stack(rasList)
+rStack <- stack(rasList[2:3])
 
 # rename rstack contents
 names(rStack) <- c("NDVI", "band2", "band3", "band4", "band5", "band6", "band7")
@@ -96,14 +96,9 @@ trainData@data<-trainData@data[complete.cases(trainData@data),]
 # export extracted data to .csv
 write.csv(trainData@data, file = "Otjo_CrownCover_MF_trainData.csv",row.names=FALSE)
 
-# randomly select index numbers and use that for splitting the data
-# set 75% as training nad 25% as test data
-trainIndex=sample(1:nrow(trainData@data),size=0.75*nrow(trainData@data))
-trainingSet=trainData@data[trainIndex,]
-testingSet=trainData@data[-trainIndex,]
-
-#train the RF model
-cc_model <- train(as.factor(crown_cover) ~ NDVI + band2, method = "rf", data =  trainingSet)
+#set up you rf model
+tcontrol <- trainControl(method="boot", number=100)
+cc_model <- train(as.factor(crown_cover) ~ NDVI + band2, method = "rf", trControl = tcontrol, data =  trainData@data)
 
 # check for error convergence
 plot(cc_model)
@@ -117,10 +112,5 @@ beginCluster()
 prediction <- clusterR(covs, raster::predict, args = list(model = cc_model))
 endCluster()
 
-#let's better work with the testing set as it is an independent set of data 
-#and let's examine the producer's accuracy for the model
-prediction_2 <- predict(cc_model, testingSet)
-confusionMatrix(prediction_2, testingSet$crown_cover)$overall[1]
-
 #save your output
-writeRaster(prediction, filename="Otjozondjupa_CrownCover_2016", format="GTiff", overwrite=TRUE)
+writeRaster(prediction, filename="Otjozondjupa_CrownCover_2016_new", format="GTiff", overwrite=TRUE)
