@@ -154,7 +154,7 @@ head(monthNDVI)
 
 # plot data by month
 Monthly_NDVI_Plot<-ggplot(monthNDVI, aes(month_name, monthNDVI, group=4)) +
-  geom_line(colour="red") +
+  geom_line(colour="red") + 
   ggtitle("Average NDVI (2005-2015) - Monthly") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
