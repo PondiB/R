@@ -1,247 +1,227 @@
-#########################################
-# script extracts NDVI values from MODIS rasters and plots a time series by season and month
-# script reads preprocessed MODIS rasters
-# set path to the working directory
-# set path to the NDVI images
-# define seasons by month
-# author John Mutua; j.y.mutua@cgiar.org
-########################################
+## ----echo=FALSE----------------------------------------------------------
+#NDVI time series analysis
+#John Mutua, CIAT
 
-# workspace clearance
+## ------------------------------------------------------------------------
+#clear your work space
 rm(list = ls(all = TRUE))
 
-## ----load-libraries----
-# load packages
-require(raster) #working with rasters#
-require(rgdal) #working with geospatial data#
-require(ggplot2) #creating graphs#
-require(dplyr) #subsetting by season#
-require(lubridate) #working with dates#
-require(grid) #arranging plots#
-require(gridExtra) #arranging plots#
+## ----echo=FALSE, warning=FALSE-------------------------------------------
+library("knitr")
+opts_knit$set(root.dir = "C:/LDN_Workshop/Sample_dataset/NDVI_data")
 
-## set working directory
-setwd("D:/ToBackup/Data/Regional/LDN_Namibia")
+## ----setup, include=FALSE, cache=FALSE-----------------------------------
+muffleError <- function(x,options) {}
+knit_hooks$set(error=muffleError)
 
-## ----import-NDVI-rasters----
-rasList <- list.files("NDVI_Modis/AOI_NDVI", full.names = TRUE, pattern = ".tif$")
+## ------------------------------------------------------------------------
+#load packages
+.packages = c("rgdal","raster","ggplot2","dplyr","lubridate","grid","gridExtra","dygraphs")
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+lapply(.packages, require, character.only=TRUE)
 
-# create a raster stack
-NDVI_Otjo_stack <- stack(rasList) 
+## ----help, eval=FALSE----------------------------------------------------
+## #this is how you read more on functions
+## help(calc)
+## ?calc
 
-# insert a Temporal id
-oldnames<-names(NDVI_Otjo_stack)
+## ------------------------------------------------------------------------
+#set your working directory
+setwd("C:/LDN_Workshop/Sample_dataset/NDVI_data")
+
+## ------------------------------------------------------------------------
+#import rasters
+r.stack <- stack(list.files(getwd(), full.names = TRUE, 
+                                    pattern = ".tif$"))
+
+## ------------------------------------------------------------------------
+#insert temporal ID in the dataframe
+oldnames<-names(r.stack)
 head(oldnames)
-# characters corresponding to the year are located between the 20 and 23 position
 year<-substr(oldnames,20,23)
 table(year)
-
-# characters corresponding to the date are located between the 24 and 26 position
 julianDay<-substr(oldnames,24,26)
 
-# calculate mean NDVI for each raster and convert output array to a data frame
-avg_NDVI_Otjo <- as.data.frame(cellStats(NDVI_Otjo_stack,mean))
+## ------------------------------------------------------------------------
+#calculate mean NDVI
+avg.NDVI <- as.data.frame(cellStats(r.stack,mean))
 
-names(avg_NDVI_Otjo)
+## ------------------------------------------------------------------------
+#rename NDVI column
+names(avg.NDVI) <- "NDVI"
 
-# view only the value in row 1, column 1 of the data frame
-avg_NDVI_Otjo[1,1]
+## ------------------------------------------------------------------------
+#add julina day as a column
+avg.NDVI$julianDay <- julianDay
 
-# view column name slot
-names(avg_NDVI_Otjo)
+## ------------------------------------------------------------------------
+#check out the new column
+class(avg.NDVI$julianDay)
 
-# rename the NDVI column
-names(avg_NDVI_Otjo) <- "meanNDVI"
-
-# view clean column name 
-names(avg_NDVI_Otjo)
-
-# add julianDay values as a column in the data frame
-avg_NDVI_Otjo$julianDay <- julianDay
-
-# what class is the new column
-class(avg_NDVI_Otjo$julianDay)
-
-# create a time vector with the date
+## ------------------------------------------------------------------------
+#create time vector and convert to date
 tVector<-paste(year,julianDay,sep="-")
-
-# convert the vector to a date
 timeNDVI<-as.Date(tVector,format = "%Y-%j")
-head(timeNDVI)
 
-# add date values as a column in the data frame
-avg_NDVI_Otjo$date <- timeNDVI
+## ------------------------------------------------------------------------
+#add date values as a column in the data frame
+avg.NDVI$date <- timeNDVI
 
-# Classes of the two columns now? 
-class(avg_NDVI_Otjo$date)
-class(avg_NDVI_Otjo$julianDay)
+## ------------------------------------------------------------------------
+#check out 'class' of the two columns now
+class(avg.NDVI$date)
+class(avg.NDVI$julianDay)
 
-# add a site column to our data
-avg_NDVI_Otjo$site <- "Otjozondjupa Region"
+## ------------------------------------------------------------------------
+#add site and year columns to the data frame
+avg.NDVI$site <- "Otjiwarongo Region"
+avg.NDVI$year <- year
 
-# view data
-head(avg_NDVI_Otjo)
+## ------------------------------------------------------------------------
+#plot NDVI by year although this doesn't make sense
+ggplot(avg.NDVI, aes(year, NDVI), na.rm=TRUE) +
+  geom_point(size=2,colour = "PeachPuff4") + 
+  ggtitle("MODIS Derived NDVI - Otjiwarongo Region") +
+  xlab("Year") + ylab("Mean NDVI") +
+  theme(text = element_text(size=16))
 
-# add a "year" column to our data
-avg_NDVI_Otjo$year <- year
+## ------------------------------------------------------------------------
+#write NDVI data to .csv
+NDVI.Values<-avg.NDVI
+row.names(NDVI.Values)<-NULL
+write.csv(NDVI.Values, file="NDVI_2005-2015.csv")
 
-# view data
-avg_NDVI_Otjo
+## ------------------------------------------------------------------------
+#add month to data frame
+avg.NDVI$month  <- month(avg.NDVI$date)
 
-## ----plot-time-series----
-# plot NDVI by time although this doesn't make sense
-
-ggplot(avg_NDVI_Otjo, aes(year, meanNDVI), na.rm=TRUE) +
-  geom_point(size=4,colour = "PeachPuff4") + 
-  ggtitle("MODIS Derived NDVI - Otjozondjupa Region") +
-  xlab("Time") + ylab("Mean NDVI") +
-  theme(text = element_text(size=20))
-
-## write NDVI data to a .csv File
-# create new df to prevent changes to avg_NDVI_Otjo
-Otjo_NDVI_Values<-avg_NDVI_Otjo
-
-# drop the row.names column 
-row.names(Otjo_NDVI_Values)<-NULL
-
-# check data frame
-head(Otjo_NDVI_Values)
-
-# create a .csv of mean NDVI values 
-write.csv(Otjo_NDVI_Values, file="meanNDVI_Otjo_2005-2015.csv")
-
-# add month to data frame
-avg_NDVI_Otjo$month  <- month(avg_NDVI_Otjo$date)
-
-# view head and tail of column
-head(avg_NDVI_Otjo$month)
-tail(avg_NDVI_Otjo$month)
-
-# subset by data by Season
-# create a new categorical variable called season by grouping months together.
-avg_NDVI_Otjo_Seasons <- avg_NDVI_Otjo %>% 
+## ------------------------------------------------------------------------
+#subset data by season
+avg.NDVI <- avg.NDVI %>% 
   mutate(season = 
            ifelse(month %in% c(12, 1, 2, 3, 4, 5), "Hot-Wet",
                   ifelse(month %in% c(6, 7, 8), "Cool-Dry",
                          ifelse(month %in% c(9, 10, 11), "Hot-Dry", "Error"))))
 
-# check to see if this worked
-head(avg_NDVI_Otjo_Seasons$month)
-head(avg_NDVI_Otjo_Seasons$season)
-tail(avg_NDVI_Otjo_Seasons$month)
-tail(avg_NDVI_Otjo_Seasons$season)
+## ------------------------------------------------------------------------
+#did the above work?
+head(avg.NDVI$month)
+head(avg.NDVI$season)
+tail(avg.NDVI$month)
+tail(avg.NDVI$season)
 
-######################################
-###-----------MONTHLY PLOTS--------###
-######################################
-
-# aggregate data by month
-monthNDVI<-avg_NDVI_Otjo_Seasons %>%
+## ------------------------------------------------------------------------
+#aggregate data by month and calculate standard deviation and error
+month.summary<-avg.NDVI %>%
   group_by(month) %>%
-  summarise(monthNDVI=mean(meanNDVI, na.rm=TRUE))
+  summarise(mean.NDVI=mean(NDVI, na.rm=TRUE),
+            sd_NDVI = sd(NDVI), #standard deviation of each group
+            n_NDVI = n(),  #sample size per group
+            SE_NDVI = sd(NDVI)/sqrt(n())) #standard error of each group
 
-# convert month numeric to month abbrevaition
-monthNDVI$month_name <- month.abb[monthNDVI$month]
+## ------------------------------------------------------------------------
+#convert month numeric to month abbreviation
+month.summary$month_name <- month.abb[month.summary$month]
 
-# reassign the month_name field to a factor
-monthNDVI$month_name = factor(monthNDVI$month_name,
+## ------------------------------------------------------------------------
+#reassign the 'month_name' field to a factor
+month.summary$month_name = factor(month.summary$month_name,
                               levels=c('Jan','Feb','Mar',
                                        'Apr','May','Jun','Jul',
                                        'Aug','Sep','Oct',
                                        'Nov','Dec'))
 
-head(monthNDVI)
-
-# plot data by month
-Monthly_NDVI_Plot<-ggplot(monthNDVI, aes(month_name, monthNDVI, group=4)) +
-  geom_line(colour="red") + 
+## ------------------------------------------------------------------------
+#plot data by month and save as .pdf
+monthly.NDVI.plot<-ggplot(month.summary, aes(month_name, mean.NDVI, group=4)) +
+  geom_line(colour="red") +
+  geom_errorbar(aes(ymin=mean.NDVI-sd_NDVI, ymax=mean.NDVI+sd_NDVI),width=0.2) +
   ggtitle("Average NDVI (2005-2015) - Monthly") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
-Monthly_NDVI_Plot
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
+monthly.NDVI.plot
+ggsave(file="Otjiwarongo_Monthly_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 
-# plot the same plot as before but with one plot per season, save as .pdf
-ggsave(file="Otjozondjupa_Monthly_NDVI.pdf", width = 297, height = 210, units = "mm")
-
-###----------INDIVINDUAL SEASONAL PLOTS------------###
-### HOT-WET Season
-Hot_Wet <- subset(monthNDVI, month >= 12 | month <= 5)
+## ------------------------------------------------------------------------
+#plot HOT-WET season and save as .pdf
+Hot.Wet <- subset(month.summary, month >= 12 | month <= 5)
 target <- c("12", "5", "4", "3", "2", "1")
-Hot_Wet<-Hot_Wet[match(target, Hot_Wet$month),]
-
-Hot_Wet$month_name <- factor(Hot_Wet$month_name, c("Dec", "Jan", "Feb", "Mar", "Apr", "May"))
-
-Hot_Wet_NDVI_Plot<-ggplot(Hot_Wet, aes(month_name, monthNDVI, group=1)) +
+Hot.Wet<-Hot.Wet[match(target, Hot.Wet$month),]
+Hot.Wet$month_name <- factor(Hot.Wet$month_name, c("Dec", "Jan", "Feb", "Mar", 
+                                                   "Apr", "May"))
+Hot.Wet.NDVI.Plot<-ggplot(Hot.Wet, aes(month_name, mean.NDVI, group=1)) +
   geom_line(colour="red") +
+  geom_errorbar(aes(ymin=mean.NDVI-sd_NDVI, ymax=mean.NDVI+sd_NDVI),width=0.2) +
   ggtitle("Average NDVI (2005-2015) - Hot Wet Season ") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
-Hot_Wet_NDVI_Plot
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
+Hot.Wet.NDVI.Plot
+ggsave(file="Otjiwarongo_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 
-# plot the same plot as before but with one plot per season, save as .pdf
-ggsave(file="Otjozondjupa_Hot_Wet_NDVI.pdf", width = 297, height = 210, units = "mm")
-
-### COOL-DRY Season
-Cool_Dry <- subset(monthNDVI, month <= 8 & month >= 6)
-
-Cool_Dry_NDVI_Plot<-ggplot(Cool_Dry, aes(month_name, monthNDVI, group=1)) +
+## ------------------------------------------------------------------------
+#plot COOL-DRY season and save as .pdf
+Cool_Dry <- subset(month.summary, month <= 8 & month >= 6)
+Cool_Dry_NDVI_Plot<-ggplot(Cool_Dry, aes(month_name, mean.NDVI, group=1)) +
   geom_line(colour="red") +
+  geom_errorbar(aes(ymin=mean.NDVI-sd_NDVI, ymax=mean.NDVI+sd_NDVI),width=0.2) +
   ggtitle("Average NDVI (2005-2015) - Cool Dry Season") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
 Cool_Dry_NDVI_Plot
+ggsave(file="Otjiwarongo_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 
-# plot the same plot as before but with one plot per season, save as .pdf
-ggsave(file="Otjozondjupa_Cool_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
-
-### HOT DRY Season
-Hot_Dry <- subset(monthNDVI, month <= 11 & month >= 9)
-
-Hot_Dry_NDVI_Plot<-ggplot(Hot_Dry, aes(month_name, monthNDVI, group=1)) +
+## ------------------------------------------------------------------------
+#plot HOT DRY season
+Hot.Dry <- subset(month.summary, month <= 11 & month >= 9)
+Hot.Dry.NDVI.Plot<-ggplot(Hot.Dry, aes(month_name, mean.NDVI, group=1)) +
   geom_line(colour="red") +
+  geom_errorbar(aes(ymin=mean.NDVI-sd_NDVI, ymax=mean.NDVI+sd_NDVI),width=0.2) +
   ggtitle("Average NDVI (2005-2015) - Hot Dry Season") +
   xlab("Month") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
-Hot_Dry_NDVI_Plot
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
+Hot.Dry.NDVI.Plot
+ggsave(file="Otjiwarongo_Hot.Dry_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 
-# plot the same plot as before but with one plot per season, save as .pdf
-ggsave(file="Otjozondjupa_Hot_Dry_NDVI.pdf", width = 297, height = 210, units = "mm")
-
-##-----------END OF MONTHLY PLOTS--------
-
-######################################
-##-----------SEASONAL PLOTS--------
-######################################
-
-# aggregate data by season
-seasonNDVI<-avg_NDVI_Otjo_Seasons %>%
+## ------------------------------------------------------------------------
+#aggregate data by season
+season.NDVI<-avg.NDVI %>%
   group_by(year, season) %>%
-  summarise(seasonNDVI=mean(meanNDVI, na.rm=TRUE))
+  summarise(season.NDVI=mean(NDVI, na.rm=TRUE),
+            sd_NDVI = sd(NDVI), #standard deviation of each group
+            n_NDVI = n(),  #sample size per group
+            SE_NDVI = sd(NDVI)/sqrt(n())) #standard error of each group)
 
-# create a .csv of seasonal NDVI values 
-write.csv(seasonNDVI, file="Seasonal_NDVI_2005-2015.csv")
+## ------------------------------------------------------------------------
+#export .csv file of seasonal NDVI values
+write.csv(season.NDVI, file="Seasonal_NDVI_2005-2015.csv")
 
-# plot data by season
-Seasonal_NDVI_Plot<-ggplot(seasonNDVI, aes(year, seasonNDVI, group=3)) +
+## ------------------------------------------------------------------------
+#plot data by season and save as .pdf
+Seasonal.NDVI.Plot<-ggplot(season.NDVI, aes(year, season.NDVI, group=3)) +
   geom_line(colour="red") +
+  geom_errorbar(aes(ymin=season.NDVI-sd_NDVI, ymax=season.NDVI+sd_NDVI),width=0.2) +
   ggtitle("Average NDVI (2005-2015) - Seasonal") +
   xlab("Year") + ylab("Mean NDVI") +
   theme(plot.title = element_text(lineheight=.8, face="bold",
-                                  size = 20)) +
-  theme(text = element_text(size=18)) + geom_point()
+                                  size = 16)) +
+  theme(text = element_text(size=14)) + geom_point()
+Seasonal.NDVI.Plot + facet_grid(season ~ .)
+ggsave(file="Otjiwarongo_Seasonal_NDVI.pdf", width = 297, height = 210, units = 
+         "mm")
 
-# plot the same plot as before but with one plot per season, save as .pdf
-Seasonal_NDVI_Plot + facet_grid(. ~ season)
-ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")
+## ------------------------------------------------------------------------
+#end of exercise
 
-# plot the same plot in a landscape orientation, save as .pdf
-Seasonal_NDVI_Plot + facet_grid(season ~ .)
-ggsave(file="Otjozondjupa_Seasonal_NDVI.pdf", width = 297, height = 210, units = "mm")

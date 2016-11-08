@@ -1,159 +1,226 @@
-#calculate bush density using count data with ndvi and crown cover data as covariates
-#author: Mutua John
-#email: j.y.mutua@cgiar.org
+## ----echo=FALSE----------------------------------------------------------
+#Bush density mapping
+#John Mutua, CIAT
 
-#workspace clearance
+## ------------------------------------------------------------------------
+#clear your work space
 rm(list = ls(all = TRUE))
 
-#set the random seed 
-set.seed(500)
+## ----echo=FALSE----------------------------------------------------------
+library("knitr")
+opts_knit$set(root.dir= "C:/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
 
-#list of packages for session
-#packages will be installed if not already installed
-#packages will then be loaded into the session
+## ----setup, echo=FALSE, include=FALSE, cache=FALSE-----------------------
+muffleError <- function(x,options) {}
+knit_hooks$set(error=muffleError)
+
+## ------------------------------------------------------------------------
+#set the random seed
+set.seed(211134)
+
+## ------------------------------------------------------------------------
+#set the start of data processing
+startTime <- Sys.time()
+cat("Start time", format(startTime),"\n")
+
+## ------------------------------------------------------------------------
+#set working directory
+setwd("C:/LDN_Workshop/Sample_dataset/Bush_Density_Mapping")
+
+## ------------------------------------------------------------------------
+#load packages
 .packages = c("sp","rgdal","raster","randomForest","plyr","xlsx","xlsxjars",
               "dplyr","caret","car", "e1071","snow")
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 
-#set working directory
-setwd("D:/Users/DemoA/WorkDocs/Bush_Density_Mapping")
+## ----help, eval=FALSE----------------------------------------------------
+## #this is how you get more help on functions
+## help(calc)
+## ?calc
 
+## ------------------------------------------------------------------------
 #read in data from excel sheet
-BushData <- read.xlsx("Field_data/Bush_Density_Sampling_Points.xlsx", sheetName = "BushDensity", header=TRUE)
+raw.d <- read.xlsx("Field_data/Otji_BD_Sampling_Points.xlsx", sheetName = 
+                        "Sheet1", header=TRUE)
 
-#calculate values by finding the sum of values for counts
-#1 plot 0.01 ha; 4 plots 0.04 ha
-BushData$shrubs_less_1.5 <- apply(BushData[,8:11], 1, sum, na.rm=TRUE)
-BushData$shrubs_more_1.5_no_stem <- apply(BushData[,16:19], 1, sum, na.rm=TRUE)
-BushData$shrubs_more_1.5_stem <- apply(BushData[,24:27], 1, sum, na.rm=TRUE)
+## ------------------------------------------------------------------------
+#calculate values
+raw.d$shrubs_less_1.5 <- apply(raw.d[,8:11], 1, sum, na.rm=TRUE)
+raw.d$shrubs_more_1.5_no_stem <- apply(raw.d[,16:19], 1, sum, na.rm=TRUE)
+raw.d$shrubs_more_1.5_stem <- apply(raw.d[,24:27], 1, sum, na.rm=TRUE)
 
-#create new data frame with the columns you need
-BushData_clean<-BushData[,c("Waypoint_No","Latitude","Longitude", "shrubs_less_1.5", 
-                            "shrubs_more_1.5_no_stem", "shrubs_more_1.5_stem")]
+## ------------------------------------------------------------------------
+#create new dataframe with columns you need
+raw.d<-raw.d[,c("Waypoint_No","Latitude","Longitude",
+                            "shrubs_less_1.5","shrubs_more_1.5_no_stem",
+                            "shrubs_more_1.5_stem")]
 
-#add two new columns of shrubs more than 1.5 and all shrubs in general
-BushData_clean$shrubs_more_1.5 <- apply(BushData_clean[,5:6], 1, sum, na.rm=TRUE)
-BushData_clean$shrubs_all <- apply(BushData_clean[,4:6], 1, sum, na.rm=TRUE)
+## ------------------------------------------------------------------------
+#add two new columns of shrubs > 1.5 and all shrubs in general
+raw.d$shrubs_more_1.5 <- apply(raw.d[,5:6], 1, sum, na.rm=TRUE)
+raw.d$shrubs_all <- apply(raw.d[,4:6], 1, sum, na.rm=TRUE)
 
+## ------------------------------------------------------------------------
 #round columns
-BushData_clean<-BushData_clean %>% mutate_each(funs(round(.,0)), shrubs_less_1.5, 
-                                               shrubs_more_1.5_no_stem, shrubs_more_1.5_stem, 
-                                               shrubs_more_1.5, shrubs_all)
+raw.d<-raw.d %>% 
+  mutate_each(funs(round(.,0)), shrubs_less_1.5, shrubs_more_1.5, 
+              shrubs_all)
+raw.d<-raw.d[,c("Waypoint_No","Latitude","Longitude","shrubs_less_1.5", 
+        "shrubs_more_1.5", "shrubs_all")]
 
-#remove NAs
-BushData_clean<-BushData_clean[complete.cases(BushData_clean),]
+## ------------------------------------------------------------------------
+#compute shrubs per hectare
+raw.d$shrubs_less_1.5 <- raw.d$shrubs_less_1.5*25
+raw.d$shrubs_more_1.5 <- raw.d$shrubs_more_1.5*25
+raw.d$shrubs_all <- raw.d$shrubs_all*25
 
+## ------------------------------------------------------------------------
+#remove all NAs
+raw.d<-raw.d[complete.cases(raw.d),]
+
+## ------------------------------------------------------------------------
+#plot histograms of the three variables
+hist(raw.d$shrubs_less_1.5, col = "lightblue", xlab="Count", main="Shrubs, [<1.5]")
+hist(raw.d$shrubs_more_1.5, col = "lightblue", xlab="Count", main="Shrubs, [>1.5]")
+hist(raw.d$shrubs_all, col = "lightblue", xlab="Count", main="Shrubs, [all]")
+
+## ------------------------------------------------------------------------
 #export data to .csv
-write.csv(BushData_clean, file = "Otjo_BushData.csv",row.names=FALSE)
+write.csv(raw.d, file = "Otji_BushData_trainData.csv",row.names=FALSE)
 
-#get long and lat from your data.frame. Make sure that the order is in lon/lat.
-#convert the dataraframe into a spatial point dataframe
-xy <- BushData_clean[,c(3,2)]
-trainDatageo <- SpatialPointsDataFrame(coords = xy, data = BushData_clean,
-                                       proj4string = CRS("+proj=longlat 
-                                                         +datum=WGS84"))
+## ------------------------------------------------------------------------
+#make shapefiles
+xy <- raw.d[,c(3,2)]
+trainDatageo <- SpatialPointsDataFrame(coords = xy, data = raw.d,
+                                    proj4string = CRS("+proj=longlat 
+                                                      +datum=WGS84"))
 trainData <- spTransform(trainDatageo, CRS('+proj=utm +zone=33 +south 
                                            +datum=WGS84'))
 
-#check names of fields
+## ------------------------------------------------------------------------
+#rename fields
 names(trainData)
+names(trainData) <- c("Waypoint_No","Latitude","Longitude","shrubs_less_1.5",
+                      "shrubs_more_1.5", "shrubs_all")
 
-#rename trainData
-names(trainData) <- c("waypoint_No","latitude","longitude","shrubs_less_1.5", "shrubs_more_1.5_no_stem", 
-                      "shrubs_more_1.5_stem", "shrubs_more_1.5", "shrubs_all")
+## ------------------------------------------------------------------------
+#import the rest of input data, stack and rename contents
+r.list<-list.files(".", pattern = ".tif$", full.names = TRUE)
+r.stack <- stack(r.list)
+names(r.stack) <- c("cc","ndvi","b2","b3","b4","b5","b6","b7")
 
-#----import input data----
-rasList <- list.files("Raster_data/", pattern = ".tif$", full.names = TRUE)
+## ------------------------------------------------------------------------
+#import the bush area mask
+o.mask <- raster("Other_data/Otji_BushArea_2016.tif")
 
-#create a raster stack and rename the contents
-rstack <- stack(rasList)
-names(rstack) <- c("crown_cover","NDVI","band2","band3","band4","band5","band6","band7")
-
-#import Bush Area raster
-Otjo_BushArea <- raster("Raster_data/Other_data/Otjozondjupa_BushArea_2016.tif")
-
-#check various stuff
-crs(rstack)
-crs(Otjo_BushArea)
-crs(trainData)
-extent(rstack)
-extent(Otjo_BushArea)
-extent(trainData)
-
+## ------------------------------------------------------------------------
 #set extent of the training data to match covs
-trainData@bbox <- bbox(Otjo_BushArea)
+trainData@bbox <- bbox(o.mask )
 
-#mask the covariates or read in covariates
-covs <- mask(rstack, Otjo_BushArea)
+## ------------------------------------------------------------------------
+#plot the points on top of `layer 3` of the raster stack
+plot(r.stack[[3]])
+plot(trainData, add=TRUE, col = "red", pch = 3)
 
-#assign raster values to training data
+## ------------------------------------------------------------------------
+#mask and remove NAs in the covariates
+covs <- mask(r.stack, o.mask )
+covs <- na.omit(covs)
+
+## ------------------------------------------------------------------------
+#assign raster values to the training data
 v<-as.data.frame(extract(covs,trainData))
 trainData@data=data.frame(trainData@data, v[match(rownames(trainData@data),
                                                   rownames(v)),])
-#rename fields in training dataset
-#remove NAs
-names(trainData) <- c("waypoint_no","latitude","longitude","shrubs_less1.5", "shrubs_more1.5_no_stem",
-                      "shrubs_more1.5_stem", "shrubs_more1.5", "shrubs_all", "crown_cover","NDVI",
-                      "band2","band3","band4","band5","band6","band7")
+
+## ------------------------------------------------------------------------
+#rename fields in the training dataset, remove NAs, write the dataset 
+names(trainData) <- c("waypoint.no","lat","lon","shrubs.l1.5","shrubs.g1.5",
+                      "shrubs.all","cc","ndvi","b2","b3","b4","b5","b6","b7")
 trainData@data<-trainData@data[complete.cases(trainData@data),]
-write.csv(trainData@data, file = "Otjo_RF_trainData.csv",row.names=FALSE)
+write.csv(trainData@data, file = "Otji_MF_trainData.csv",row.names=FALSE)
 
-#let's plot  some of the variables
-scatterplot(band5 ~ shrubs_less1.5|crown_cover, data=trainData@data, 
-            xlab="Count of Shrubs less than 1.5m",ylab="NDVI", main="NDVI versus Count of Shrubs (less than 1.5m)")
-scatterplot(band5 ~ shrubs_more1.5, data=trainData@data, 
-            xlab="Count of Shrubs more than 1.5m",ylab="NDVI", main="NDVI versus Count of shrubs more than 1.5m")
-scatterplot(band5 ~ shrubs_all, data=trainData@data, 
-            xlab="Count of shrub (all)",ylab="NDVI", main="NDVI versus Count of shrubs")
+## ------------------------------------------------------------------------
+#compute summary statistics
+summary(trainData$shrubs.all)
+skewness(trainData$shrubs.all, na.rm=T)
 
-#############################################
-#build the three models by fitting the model using the 'train' function from the 'caret' package.
-#use Bootstrap resampling method to estimate model accuracy.
-# tcontrol1 <- trainControl(method="boot", number=100)
-# model1 <- train(shrubs_less1.5~NDVI+crown_cover,method='rf', trControl = tcontrol1, data=trainData@data)
-# 
-# tcontrol2 <- trainControl(method="boot", number=100)
-# model2 <- train(shrubs_more1.5~NDVI+crown_cover,method='rf', trControl = tcontrol2, data=trainData@data)
-# 
-# tcontrol3 <- trainControl(method="boot", number=100)
-# model3 <- train(shrubs_all~NDVI+crown_cover,method='rf', trControl = tcontrol3, data=trainData@data)
+## ------------------------------------------------------------------------
+#QQ plot
+qqnorm(trainData$shrubs.all)
+qqline(trainData$shrubs.all)
 
+## ------------------------------------------------------------------------
+#compute correlation coefficients and plot correlations
+cor(trainData@data[,4:14])
+pairs(trainData@data[,4:14])
+
+## ------------------------------------------------------------------------
+#correlate count of shrubs with NDVI and Landsat 8 band 2-7
+cor(trainData@data$shrubs.l1.5,trainData@data$ndvi)
+cor(trainData@data$shrubs.all,trainData@data$ndvi)
+cor(trainData@data$shrubs.l1.5,trainData@data$cc)
+cor(trainData@data$shrubs.all,trainData@data$cc)
+cor(trainData@data$shrubs.l1.5,trainData@data$b2)
+cor(trainData@data$shrubs.all,trainData@data$b2)
+cor(trainData@data$shrubs.l1.5,trainData@data$b3)
+cor(trainData@data$shrubs.all,trainData@data$b3)
+cor(trainData@data$shrubs.l1.5,trainData@data$b6)
+cor(trainData@data$shrubs.all,trainData@data$b6)
+cor(trainData@data$shrubs.l1.5,trainData@data$b7)
+cor(trainData@data$shrubs.all,trainData@data$b7)
+
+## ------------------------------------------------------------------------
+#select covariates based on correlation analysis
+d <- trainData@data[,c("waypoint.no","lat","lon","shrubs.l1.5","shrubs.all",
+                       "cc", "ndvi")]
+names(d)
+
+## ------------------------------------------------------------------------
+#fit the model for shrubs <1.5m
 tcontrol1 <- trainControl(method="boot", number=100)
-model1 <- train(shrubs_less1.5~NDVI+crown_cover,method='rf', trControl = tcontrol1, data=trainData@data)
+model1 <- train(shrubs.l1.5~cc+ndvi,method='rf', trControl = tcontrol1, data=d)
 
-tcontrol2 <- trainControl(method="boot", number=100)
-model2 <- train(shrubs_more1.5~NDVI+crown_cover,method='rf', trControl = tcontrol2, data=trainData@data)
-
+## ------------------------------------------------------------------------
+#fit the model for all shrubs
 tcontrol3 <- trainControl(method="boot", number=100)
-model3 <- train(shrubs_all~NDVI+crown_cover,method='rf', trControl = tcontrol3, data=trainData@data)
+model3 <- train(shrubs.all~cc+ndvi,method='rf',trControl = tcontrol3, data=d)
 
-#print the 3 models
+## ------------------------------------------------------------------------
+#print models
 print(model1)
-print(model2)
 print(model3)
 
-#predict the three models
+## ------------------------------------------------------------------------
+#predict models
 beginCluster()
 prediction1 <- clusterR(covs, raster::predict, args = list(model = model1))
-prediction2 <- clusterR(covs, raster::predict, args = list(model = model2))
 prediction3 <- clusterR(covs, raster::predict, args = list(model = model3))
 endCluster()
 
-#round raster values
+## ------------------------------------------------------------------------
+#compute the density for shrubs >1.5m
+prediction2 <- prediction3 - prediction1
+
+## ------------------------------------------------------------------------
+#round the numbers
 prediction1<-round(prediction1, digits = 0)
 prediction2<-round(prediction2, digits = 0)
 prediction3<-round(prediction3, digits = 0)
+writeRaster(prediction1, "otji_bd1.tif", overwrite=TRUE)
+writeRaster(prediction2, "otji_bd2.tif", overwrite=TRUE)
+writeRaster(prediction3, "otji_bd3.tif", overwrite=TRUE)
 
-#save the predicted images as GeoTIFFs
-writeRaster(prediction1, "otjo_bd1.tif", overwrite=TRUE)
-writeRaster(prediction2, "otjo_bd2.tif", overwrite=TRUE)
-writeRaster(prediction3, "otjo_bd3.tif", overwrite=TRUE)
+## ------------------------------------------------------------------------
+#plot the three maps
+plot(prediction1, main="Density for shrubs <1.5m", axes=FALSE)
+plot(prediction2, main="Density for shrubs >1.5m", axes=FALSE)
+plot(prediction3, main="Density for shrubs", axes=FALSE)
 
-#plot the predictions.
-plot(prediction1, main="Density for shrubs less than 1.5m", axes=FALSE)
-plot(prediction2, main="Density for shrubs more than 1.5m", axes=FALSE)
-plot(prediction3, main="Density for all shrubs", axes=FALSE)
-
+## ------------------------------------------------------------------------
+#check amount of time spent
+timeDiff <- Sys.time() - startTime
+cat("\nProcessing time", format(timeDiff), "\n")
 

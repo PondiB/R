@@ -10,6 +10,11 @@ output:
 fontsize: 11
 ---
 
+```{r echo=FALSE}
+#NDVI time series analysis
+#John Mutua, CIAT
+```
+
 ### Objectives
 This manual will help you construct a time series using MODIS data.
 At the end of this session, you will be able to:
@@ -20,9 +25,7 @@ At the end of this session, you will be able to:
 4.  Plot and export graphs
 
 For more details on source of MODIS data see 
-<http://pekko.geog.umd.edu/usda/beta/data_new.php>. Otherwise, download the 
-sample dataset we will use in this session from this link 
-<https://drive.google.com/open?id=0B_Gkb_0tNKkQUVc5NUhKRzlhZTg>
+<http://pekko.geog.umd.edu/usda/beta/data_new.php>.
 
 Before you start this session, it is important you have (i) the latest 
 [R software](https://cran.r-project.org/bin/windows/base/) and (ii) 

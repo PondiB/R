@@ -11,6 +11,11 @@ output:
     fig_width: 7
 ---
 
+```{r echo=FALSE}
+#Land Use Land Cover classification
+#John Mutua, CIAT
+```
+
 ### Objectives
 This manual will help you conduct a land use land cover classification of a 
 6-band Landsat 8 image. At the end of this session, you will be able to:
@@ -20,10 +25,8 @@ This manual will help you conduct a land use land cover classification of a
 3.  Extract pixel data to train and fit a Random forests model
 4.  Speed up image classification through parallel processing (Bonus)
 
-You can download raw satellite images from this 
-[site](http://earthexplorer.usgs.gov/). Otherwise,
-download the sample dataset we will use in this session from this 
-link <https://drive.google.com/open?id=0B_Gkb_0tNKkQbktFWUFBLU9CV2c>
+For more details on source of Landsat data see 
+(http://earthexplorer.usgs.gov/).
 
 Before you start this session, it is important you have (i) the latest 
 [R software](https://cran.r-project.org/bin/windows/base/) and (ii) 
@@ -31,6 +34,7 @@ Before you start this session, it is important you have (i) the latest
 
 First, clear your workspace.
 ```{r}
+#clear your workspace
 rm(list = ls(all = TRUE))
 ```
 
@@ -46,6 +50,7 @@ knit_hooks$set(error=muffleError)
 
 Set the start of spatial data processing.
 ```{r}
+#set the start of spatial data processing
 startTime <- Sys.time()
 cat("Start time", format(startTime),"\n")
 ```
@@ -54,12 +59,14 @@ cat("Start time", format(startTime),"\n")
 
 Set your working directory. This is where you will save all outputs.
 ```{r}
+#set your working directory
 setwd("C:/LDN_Workshop/Sample_dataset/Land_Use_Land_Cover")
 ```
 
 List down the packages to be used in this session. Packages will be installed 
 if not already installed. They will then be loaded into the session.
 ```{r}
+#load packages
 .packages = c("rgdal","raster","caret")
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
@@ -69,13 +76,15 @@ lapply(.packages, require, character.only=TRUE)
 If you need to reproduce the results next time, set the seed. You can use any 
 number.
 ```{r}
+#set random seed
 set.seed(322)
 ```
 
 Import the image into R as a 'RasterBrick' object using the brick function from 
-the 'raster' package. Also let’s replace the original band names with shorter 
+the 'raster' package. Also let's replace the original band names with shorter 
 ones ( e.g. 'B1' to 'B7').
 ```{r}
+#import the image into R
 img <- brick("TOA/Otji_TOA.tif")
 names(img) <- c(paste0("B", 2:7, coll = ""))
 img
@@ -86,6 +95,7 @@ save the output for use in the next session. The resulting NDVI can be plotted
 as a map, values range from 0.2 (bare soils) to 0.6 (dense vegetation) in the 
 area.
 ```{r}
+#calculate NDVI and save the output for use in the next session
 NDVI <- (img[[4]] - img[[3]]) / (img[[4]] + img[[3]])
 writeRaster(NDVI, "Otji_NDVI.tif", overwrite=TRUE)
 plot(NDVI, main="NDVI map - Otjiwarongo")
@@ -96,6 +106,7 @@ We can make a natural colour visualization of the Landsat image in R using the
 - Blue).We use the expression 'img * (img >= 0)' to convert the negative values 
 to zero.
 ```{r}
+#make a natural colour visualization of the Landsat image
 plotRGB(img * (img >= 0), r = 4, g = 3, b = 2, scale = 10000)
 ```
 
@@ -106,6 +117,7 @@ Import the training data into R as an object of class
 61-Artificial Surface, 71-Bareland, forest and Woodland classes later combined 
 to Forest/woodland.
 ```{r}
+#import the training data into R
 trainData <- shapefile("Training_data/Otji_trainingData.shp")
 responseCol <- "LC_Code"
 ```
@@ -118,6 +130,7 @@ cover type in a column in the attribute table called ‘LC_Code’ as shown belo
 
 Plot the training data.
 ```{r}
+#plot the training data.
 plot(trainData, main="Distribution of training data", axes=FALSE)
 ```
 
@@ -128,6 +141,7 @@ image and store them in a data frame along with the corresponding land cover
 class ID. The code below allows you to extract training data using both point 
 and polygon shapefiles.
 ```{r}
+#extract the pixel values in the training areas
 trainSet = data.frame(matrix(vector(), nrow = 0, ncol = length(names(img)) + 1))
 for (i in 1:length(unique(trainData[[responseCol]]))){
   category <- unique(trainData[[responseCol]])[i]
@@ -151,6 +165,7 @@ for (i in 1:length(unique(trainData[[responseCol]]))){
 Partition the data into training and testing, this will enable us conduct 
 accuracy tests.
 ```{r}
+#partition the data into training and testing
 inData <- createDataPartition(y = trainSet$class, p = 0.7, list = FALSE)
 training <- trainSet[inData,]
 testing <- trainSet[-inData,]
@@ -159,6 +174,7 @@ testing <- trainSet[-inData,]
 As you can see below, the training and testing 'data.frames' contains values 
 for each of six 'Landsat' TOA bands plus the class attribute.
 ```{r}
+#how does the class look like
 table(training$class)
 table(testing$class)
 ```
@@ -166,6 +182,7 @@ table(testing$class)
 In our case, we will use 1000 observations which are randomly sample from the 
 training data.frame to train the model.
 ```{r}
+#randomly sample from the training data.frame
 train_sample <- training[sample(1:nrow(training), 1000), ]
 table(train_sample$class)
 ```
@@ -176,6 +193,7 @@ Define and fit the .RandomForests. model using the 'train' function from the
 'caret' package by specifying the model as a formula with the dependent
 variable (i.e., the land cover types IDs) encoded as factors.
 ```{r}
+#fit the trandom forest model
 rf_Otji <- train(as.factor(class) ~ B3 + B4 + B5, method = "rf", data =  
                    train_sample)
 ```
@@ -185,15 +203,17 @@ fitted model object (i.e., 'rf_Otji'). Speed up computations using the
 'clusterR' function from the 'raster' package which supports 
 multi-core computing for functions such as predict (NB: install 'snow' package).
 ```{r}
+#cluster the predictions
 beginCluster()
 prediction <- clusterR(img, raster::predict, args = list(model = rf_Otji))
 endCluster()
 ```
 
 Test the accuracy using the 'testing' dataset as it is an independent set 
-of data and let’s examine the producer’s accuracy (aka sensitivity in the caret 
+of data and let's examine the producer's accuracy (aka sensitivity in the caret 
 package) for the model.
 ```{r}
+#test accuracy of testing dataset
 prediction_2 <- predict(rf_Otji, testing)
 confusionMatrix(prediction_2, testing$class)$overall[1]
 confusionMatrix(prediction_2, testing$class)$byClass[, 1]
@@ -201,6 +221,7 @@ confusionMatrix(prediction_2, testing$class)$byClass[, 1]
 
 Save your classified image as a GeoTIFF.
 ```{r}
+#save your classified image as a GeoTIFF
 writeRaster(prediction, "Otji_classified.tif", overwrite=TRUE)
 ```
 
@@ -209,6 +230,7 @@ this categories 1-Forest, 2-Woodland, 31-Bushland, 32-Grassland,
 42-Cultivated area, 51-Wetland, 52-Water body, 61-Artificial Surface, 
 71-Bareland?
 ```{r}
+#visualize your classified image
 cols <- c("dark green", "forestgreen", "yellow", "magenta", "blue", "red")
 plot(prediction, col=cols, legend=FALSE, main="Land Use Land Cover-Otjiwarongo")
 legend("bottomright", 
@@ -219,6 +241,7 @@ legend("bottomright",
 
 Finally, check the amount of time you spent conducting this analysis.
 ```{r}
+#check the amount of time you spent conducting this analysis
 timeDiff <- Sys.time() - startTime
 cat("\nProcessing time", format(timeDiff), "\n")
 ```
